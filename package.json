@@ -1,0 +1,22 @@
+{
+  "name": "znz-luxury-bridals",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js",
+    "reset": "node seed.js --force"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Z&Z — Luxury Bridals & Formals storefront + admin panel",
+  "dependencies": {
+    "express": "^4.22.3",
+    "multer": "^2.5.0",
+    "sharp": "^0.35.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

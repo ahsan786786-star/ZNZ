@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Z&amp;Z · Admin Panel</title>
+<link rel="icon" href="/assets/img/logo-mark.png" />
+<link rel="stylesheet" href="/assets/fonts/fonts.css" />
+<link rel="stylesheet" href="/assets/css/admin.css?v=__V__" />
+</head>
+<body>
+
+<!-- ============================== LOGIN ============================== -->
+<section id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <img src="/assets/img/logo-3d@2x.png" alt="Z&Z" />
+      <div>
+        <b>Z&amp;Z</b>
+        <i>Admin Panel</i>
+      </div>
+    </div>
+    <p class="login-sub">Private access — username, password and 4-digit PIN required.</p>
+    <form id="loginForm" autocomplete="off">
+      <label class="fld"><span>Username</span><input id="lgUser" required autocomplete="username" /></label>
+      <label class="fld"><span>Password</span><input id="lgPass" type="password" required autocomplete="current-password" /></label>
+      <label class="fld"><span>4-digit PIN</span><input id="lgPin" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required autocomplete="off" placeholder="••••" /></label>
+      <button class="btn gold" type="submit" id="lgBtn">Log in</button>
+      <div class="msg" id="lgMsg"></div>
+    </form>
+    <a class="back" href="/">← Back to store</a>
+  </div>
+</section>
+
+<!-- ============================== PANEL ============================== -->
+<div id="panel" class="panel" hidden>
+  <aside class="side">
+    <div class="side-brand">
+      <img src="/assets/img/logo-3d@2x.png" alt="Z&Z" />
+      <div><b>Z&amp;Z</b><i>Control Room</i></div>
+    </div>
+    <nav class="side-nav" id="sideNav">
+      <button data-tab="dashboard" class="on">Dashboard</button>
+      <button data-tab="posters">Posters &amp; Hero</button>
+      <button data-tab="collections">Collections</button>
+      <button data-tab="items">Dresses &amp; Prices</button>
+      <button data-tab="home">Home Sections</button>
+      <button data-tab="motion">Layout &amp; Motion</button>
+      <button data-tab="looks">Try-On Photos</button>
+      <button data-tab="ads">Advertisements</button>
+      <button data-tab="inbox">Inbox <span class="dot" id="inboxDot" hidden></span></button>
+      <button data-tab="look">Look &amp; Colours</button>
+      <button data-tab="contact">Contact &amp; Social</button>
+      <button data-tab="pages">About / Terms / SEO</button>
+      <button data-tab="security">Security</button>
+    </nav>
+    <div class="side-foot">
+      <a href="/" target="_blank" rel="noopener">View store ↗</a>
+      <button id="logoutBtn">Log out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button id="sideToggle" class="side-toggle" aria-label="Toggle menu">☰</button>
+      <h1 id="tabTitle">Dashboard</h1>
+      <div class="top-actions">
+        <span class="who" id="who"></span>
+        <span class="saved" id="savedFlag"></span>
+      </div>
+    </header>
+    <div id="tabBody" class="tab-body"></div>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<input type="file" id="hiddenFile" hidden multiple accept="image/*,video/mp4,video/webm,video/quicktime" />
+<div id="pickModal" class="pick-modal" hidden></div>
+
+<script src="/assets/js/admin.js?v=__V__" defer></script>
+</body>
+</html>

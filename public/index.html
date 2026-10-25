@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>__TITLE__</title>
+<meta name="description" content="__DESC__" />
+<meta name="keywords" content="__KEYWORDS__" />
+<link rel="canonical" href="__CANONICAL__" />
+<meta name="robots" content="index,follow,max-image-preview:large" />
+<meta name="theme-color" content="#f7f2e8" />
+<meta name="format-detection" content="telephone=no" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Z&amp;Z — Luxury Bridals &amp; Formals" />
+<meta property="og:title" content="__TITLE__" />
+<meta property="og:description" content="__DESC__" />
+<meta property="og:image" content="__OG_IMAGE__" />
+<meta property="og:url" content="__CANONICAL__" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="__TITLE__" />
+<meta name="twitter:description" content="__DESC__" />
+<meta name="twitter:image" content="__OG_IMAGE__" />
+
+<link rel="icon" href="/assets/img/logo-mark.png" sizes="any" />
+<link rel="apple-touch-icon" href="/assets/img/icon-192.png" />
+<link rel="manifest" href="/manifest.webmanifest" />
+
+<link rel="preload" href="/assets/fonts/great-vibes-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/assets/fonts/cormorant-garamond-600-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/assets/img/logo-3d@2x.png?v=__V__" as="image" />
+<link rel="stylesheet" href="/assets/fonts/fonts.css?v=__V__" />
+<link rel="stylesheet" href="/assets/css/app.css?v=__V__" />
+
+<!-- First-paint critical CSS: the welcome screen looks complete before any JS runs -->
+<style>
+  html,body{margin:0;padding:0}
+  [hidden]{display:none!important}
+  body{background:var(--bg,#f7f2e8);color:var(--ink,#2a2118);font-family:'Jost',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow-x:hidden}
+  #welcome{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;
+    background:var(--wall,radial-gradient(120% 90% at 50% 38%,#fffdfa 0%,#f7edd6 38%,#ebdbb8 72%,#d9c69c 100%));
+    background-size:var(--wall-size,cover);background-position:50% 50%;
+    background-repeat:no-repeat;
+    transition:opacity .85s ease,visibility .85s}
+  #welcome .wtop{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;
+    justify-content:space-between;padding:14px 18px;gap:12px}
+  #welcome .wtop .cur select{appearance:none;border:1px solid rgba(150,118,52,.45);border-radius:999px;
+    background:rgba(255,253,246,.72);color:#4a3a1c;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    padding:8px 30px 8px 14px;cursor:pointer;backdrop-filter:blur(6px);
+    background-image:linear-gradient(45deg,transparent 50%,#8a6a26 50%),linear-gradient(135deg,#8a6a26 50%,transparent 50%);
+    background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  #welcome .wtop .themebtn{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+    border:1px solid rgba(150,118,52,.45);background:rgba(255,253,246,.72);color:#6b5227;font-size:16px;
+    cursor:pointer;backdrop-filter:blur(6px);transition:transform .3s var(--ease,ease)}
+  #welcome .wtop .themebtn:hover{transform:rotate(-18deg) scale(1.06)}
+  #welcome .wtop .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  html.wall-dark #welcome .wtop .cur select,html.wall-dark #welcome .wtop .themebtn{
+    background:rgba(20,16,12,.6);color:#f0e2c2;border-color:rgba(201,165,78,.5)}
+  #welcome .wi{position:relative;z-index:3;text-align:center;padding:20px;transform:translateY(-1vh)}
+  #welcome .ww{font-family:'Great Vibes',cursive;font-size:clamp(40px,min(8.4vw,9vh),104px);line-height:1.05;margin:0 0 .02em;
+    max-width:96vw;overflow:visible;padding:0 .04em;
+    background:linear-gradient(100deg,#6f5220,#a8813a 26%,#d8bc86 46%,#a8813a 64%,#6f5220);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 2px 10px rgba(160,124,44,.28))}
+  #welcome .lw{width:min(88vw,39vh,430px);margin:0 auto;perspective:1400px}
+  #welcome .lw img{width:100%;height:auto;display:block;
+    filter:drop-shadow(0 18px 30px rgba(120,92,34,.26));animation:logoGlow 7s ease-in-out infinite}
+  @keyframes logoGlow{0%,100%{filter:drop-shadow(0 16px 28px rgba(120,92,34,.22)) brightness(1)}
+    50%{filter:drop-shadow(0 22px 38px rgba(150,116,42,.36)) brightness(1.06) saturate(1.04)}}
+  #welcome .bn{font-family:'Playfair Display',Georgia,serif;font-size:clamp(46px,min(13vw,12vh),148px);letter-spacing:.02em;
+    margin:.06em 0 0;font-weight:700;line-height:.94;width:100%;
+    background:linear-gradient(100deg,#6f5220 0%,#9a7532 18%,#c19a4e 34%,#e6cd9a 48%,#c19a4e 62%,#8d6a29 82%,#6f5220 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 3px 8px rgba(140,105,40,.35))}
+  #welcome .bl{font-family:'Great Vibes',cursive;
+    font-size:clamp(20px,min(3.6vw,4.6vh),40px);letter-spacing:.02em;text-transform:none;color:#6b5227;margin:.24em 0 .1em;font-weight:400;
+    text-shadow:0 1px 0 rgba(255,255,255,.6)}
+  #welcome .hint{position:absolute;bottom:max(22px,4vh);left:0;right:0;text-align:center;z-index:3;
+    font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:#7a6739;opacity:0;animation:fadeUp 1s 1.6s forwards}
+  @keyframes fadeUp{to{opacity:.85}}
+  /* animated wallpaper templates (owner-selectable) */
+  html[data-wall-anim='shimmer'] #welcome{animation:wallShimmer 26s ease-in-out infinite}
+  html[data-wall-anim='flow'] #welcome{animation:wallFlow 30s ease-in-out infinite}
+  html[data-wall-anim='drift'] #welcome{animation:wallDrift 44s linear infinite}
+  html[data-wall-anim='spin'] #welcome{animation:wallSpin 60s linear infinite}
+  html[data-wall-anim='pulse'] #welcome{animation:wallPulse 22s ease-in-out infinite}
+  html[data-wall-anim='float'] #welcome{animation:wallFloat 26s ease-in-out infinite}
+  @keyframes wallShimmer{0%,100%{background-position:50% 50%}50%{background-position:46% 54%}}
+  @keyframes wallFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  @keyframes wallDrift{0%{background-position:0% 0%}100%{background-position:100% 100%}}
+  @keyframes wallSpin{0%{background-position:50% 50%;filter:hue-rotate(0deg)}100%{background-position:50% 50%;filter:hue-rotate(0deg)}}
+  @keyframes wallPulse{0%,100%{background-size:var(--wall-size,150%)}50%{background-size:calc(var(--wall-size,150%) * 1.08)}}
+  @keyframes wallFloat{0%,100%{background-position:50% 46%}50%{background-position:50% 56%}}
+  /* dark templates: keep the gold text readable */
+  html.wall-dark #welcome{color:#f6ecd6}
+  html.wall-dark #welcome .ww{background:linear-gradient(100deg,#8a6a2a,#c9a54e 26%,#f0dca6 46%,#c9a54e 64%,#8a6a2a)}
+  html.wall-dark #welcome .bl{color:#e6d6b4;text-shadow:none}
+  @media (prefers-reduced-motion: reduce){ #welcome{animation:none !important} }
+  #welcome canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2}
+</style>
+</head>
+<body class="locked">
+
+<!-- ============================ WELCOME / ENTRANCE ============================ -->
+<section id="welcome" aria-label="Welcome to Z&Z">
+  <canvas id="bubbleCanvas" aria-hidden="true"></canvas>
+  <div class="wtop">
+    <label class="cur">
+      <span class="sr-only">Currency</span>
+      <select id="wCur" aria-label="Choose currency"></select>
+    </label>
+    <button id="wTheme" class="themebtn" aria-label="Switch between day and night">☾</button>
+  </div>
+  <div class="wi">
+    <p class="ww" id="welcomeWord">Welcome</p>
+    <div class="lw"><div class="logo3d" id="welcomeLogo"><img src="/assets/img/logo-3d@2x.png?v=__V__" alt="Z&amp;Z logo" width="592" height="650" decoding="async" /></div></div>
+    <h1 class="bn" id="welcomeBrand">Z&amp;Z</h1>
+    <p class="bl" id="welcomeTag">Luxury Bridals &amp; Formals</p>
+  </div>
+  <div class="hint">Tap anywhere to enter</div>
+</section>
+
+<!-- ================================ APP SHELL ================================ -->
+<div id="app" aria-live="polite">
+  <header id="siteHead" class="site-head"></header>
+  <nav id="drawer" class="drawer" aria-hidden="true"></nav>
+  <div id="scrim" class="scrim" hidden></div>
+  <main id="view" class="view"></main>
+  <footer id="siteFoot" class="site-foot"></footer>
+</div>
+
+<div id="cartWrap" class="cart-wrap" hidden></div>
+<div id="modalRoot" class="modal-root" hidden></div>
+<div id="vipRoot" class="vip-root" hidden></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script type="application/ld+json">__JSONLD__</script>
+<script src="/assets/js/welcome.js?v=__V__" defer></script>
+<script src="/assets/js/tryon.js?v=__V__" defer></script>
+<script src="/assets/js/app.js?v=__V__" defer></script>
+</body>
+</html>

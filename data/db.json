@@ -1,0 +1,850 @@
+{
+  "admin": {
+    "username": "admin",
+    "passSalt": "fbb198ead14437db75c22c3b77779b44",
+    "passHash": "5c663eea419410ebd2dba97c2a6b34c1270a1cb7e6c9fc44324922197c3e860fc76a1c7fd779f741a49a6b7c673593eb3660cea106b60e96e310647ad62afd76",
+    "pinSalt": "f208bf6e94543e71bd9ebe0b534a64cc",
+    "pinHash": "44d291e735159de5904824e2aee50c437b83e068041281e753cc649f248ae790ddb7855d4c48c3669d41c358c62b091cbf48bebd447c722b34d2f246f0824fd4",
+    "updatedAt": "2026-10-24T21:31:52.210Z"
+  },
+  "settings": {
+    "brand": {
+      "name": "Z&Z",
+      "fullName": "Zain & Zara",
+      "tagline": "Luxury Bridals & Formals",
+      "welcomeWord": "Welcome",
+      "logo": "/assets/img/logo-3d@2x.png",
+      "favicon": "/assets/img/logo-mark.png",
+      "logoFlat": "/assets/img/logo-gold@2x.png",
+      "welcomeSize": 62
+    },
+    "contact": {
+      "phone": "",
+      "whatsapp": "",
+      "email": "",
+      "whatsappMessage": "Hello Z&Z! I would like to know more about your bridal collection."
+    },
+    "notice": {
+      "enabled": true,
+      "text": "New Eid Edit is live — free delivery on all orders above PKR 50,000. Limited pieces only!",
+      "link": ""
+    },
+    "social": {
+      "instagram": "",
+      "facebook": "",
+      "youtube": "",
+      "tiktok": "",
+      "snapchat": "",
+      "pinterest": ""
+    },
+    "theme": {
+      "bgLight": "#f7f2e8",
+      "bgDark": "#08080a",
+      "gold": "#c9a54e",
+      "goldDeep": "#8a6a26",
+      "defaultMode": "light",
+      "wallpapers": [
+        {
+          "id": "crystal",
+          "name": "Crystal cream",
+          "mode": "pattern",
+          "css": "radial-gradient(120% 90% at 50% 30%,#fffdfa 0%,#f7edd6 42%,#ebdbb8 72%,#d9c69c 100%)"
+        },
+        {
+          "id": "pearl",
+          "name": "Pearl white",
+          "mode": "pattern",
+          "css": "radial-gradient(110% 80% at 50% 20%,#ffffff 0%,#f6f4ef 45%,#e9e4d9 100%)"
+        },
+        {
+          "id": "ivory",
+          "name": "Ivory glow",
+          "mode": "pattern",
+          "css": "radial-gradient(120% 90% at 50% 35%,#fffaf0 0%,#f8efdc 50%,#efdfc0 100%)"
+        },
+        {
+          "id": "blush",
+          "name": "Blush silk",
+          "mode": "pattern",
+          "css": "radial-gradient(120% 90% at 45% 30%,#fff8f4 0%,#f9e9e2 48%,#eed6cd 100%)"
+        },
+        {
+          "id": "sage",
+          "name": "Sage mist",
+          "mode": "pattern",
+          "css": "radial-gradient(120% 90% at 50% 30%,#fbfefb 0%,#eef4ee 45%,#dbe6dc 100%)"
+        },
+        {
+          "id": "champagne",
+          "name": "Champagne",
+          "mode": "pattern",
+          "css": "linear-gradient(160deg,#fdf6e6 0%,#f6e8cd 40%,#ead6b3 100%)"
+        },
+        {
+          "id": "silk",
+          "name": "Silk folds",
+          "mode": "pattern",
+          "css": "linear-gradient(120deg,#fffdf7 0%,#f6edda 25%,#fffdf7 50%,#f2e6cd 75%,#fffdf7 100%)"
+        },
+        {
+          "id": "dune",
+          "name": "Desert dune",
+          "mode": "pattern",
+          "css": "radial-gradient(100% 70% at 50% 100%,#e8d8bb 0%,#f6eddd 45%,#fffdf8 100%)"
+        },
+        {
+          "id": "rosegold",
+          "name": "Rose gold",
+          "mode": "pattern",
+          "css": "linear-gradient(150deg,#fff6f1 0%,#f7e3d8 40%,#eccfc2 100%)"
+        },
+        {
+          "id": "latte",
+          "name": "Latte cream",
+          "mode": "pattern",
+          "css": "linear-gradient(160deg,#fbf6ee 0%,#f0e6d6 55%,#e2d3ba 100%)"
+        },
+        {
+          "id": "mist",
+          "name": "Morning mist",
+          "mode": "pattern",
+          "css": "radial-gradient(120% 90% at 50% 10%,#ffffff 0%,#f2f4f6 50%,#dfe4e8 100%)"
+        },
+        {
+          "id": "linen",
+          "name": "Linen weave",
+          "mode": "pattern",
+          "css": "repeating-linear-gradient(45deg,#fdfaf3 0 3px,#f7f1e5 3px 6px)"
+        },
+        {
+          "id": "royal",
+          "name": "Royal night",
+          "mode": "pattern",
+          "css": "radial-gradient(110% 80% at 50% 20%,#1c1a22 0%,#121017 55%,#08070b 100%)",
+          "dark": true
+        },
+        {
+          "id": "onyx",
+          "name": "Onyx gold",
+          "mode": "pattern",
+          "css": "radial-gradient(100% 80% at 50% 25%,#26201a 0%,#171310 55%,#0a0908 100%)",
+          "dark": true
+        },
+        {
+          "id": "midnight",
+          "name": "Midnight blue",
+          "mode": "pattern",
+          "css": "radial-gradient(110% 80% at 50% 20%,#141c2a 0%,#0d131d 55%,#05080d 100%)",
+          "dark": true
+        },
+        {
+          "id": "emerald",
+          "name": "Emerald night",
+          "mode": "pattern",
+          "css": "radial-gradient(110% 80% at 50% 20%,#122420 0%,#0b1815 55%,#050b09 100%)",
+          "dark": true
+        },
+        {
+          "id": "plum",
+          "name": "Plum night",
+          "mode": "pattern",
+          "css": "radial-gradient(110% 80% at 50% 20%,#241322 0%,#160c16 55%,#0a050a 100%)",
+          "dark": true
+        },
+        {
+          "id": "velvet",
+          "name": "Velvet smoke",
+          "mode": "pattern",
+          "css": "radial-gradient(120% 90% at 50% 30%,#2a2622 0%,#191614 55%,#0b0a09 100%)",
+          "dark": true
+        },
+        {
+          "id": "garden-bg",
+          "name": "Garden light",
+          "mode": "image",
+          "url": "/assets/img/look/garden.webp"
+        },
+        {
+          "id": "hero-poster",
+          "name": "Campaign poster",
+          "mode": "image",
+          "url": "/assets/img/posters/poster-1.webp"
+        },
+        {
+          "id": "diamond",
+          "name": "Diamond cut",
+          "mode": "pattern",
+          "anim": "shimmer",
+          "size": "200% 200%",
+          "css": "radial-gradient(120% 90% at 50% 20%,#fffdf7 0%,#f8efdb 40%,#ecdbb8 78%,#ddc79c 100%),repeating-conic-gradient(from 45deg at 50% 50%,rgba(255,255,255,.55) 0deg 12deg,rgba(214,190,140,.18) 12deg 24deg)"
+        },
+        {
+          "id": "diamond-night",
+          "name": "Diamond noir",
+          "mode": "pattern",
+          "anim": "shimmer",
+          "size": "200% 200%",
+          "dark": true,
+          "css": "radial-gradient(110% 80% at 50% 20%,#1d1a24 0%,#131019 55%,#07060a 100%),repeating-conic-gradient(from 45deg at 50% 50%,rgba(201,165,78,.16) 0deg 10deg,rgba(255,255,255,0) 10deg 22deg)"
+        },
+        {
+          "id": "gold-rays",
+          "name": "Gold rays",
+          "mode": "pattern",
+          "anim": "spin",
+          "size": "180% 180%",
+          "css": "radial-gradient(circle at 50% 45%,#fffdf5 0%,#f7ecd2 38%,#e7d3ab 72%,#d6bf94 100%),repeating-conic-gradient(from 0deg at 50% 45%,rgba(201,165,78,.14) 0deg 3deg,rgba(255,255,255,0) 3deg 9deg)"
+        },
+        {
+          "id": "aurora-gold",
+          "name": "Aurora gold",
+          "mode": "pattern",
+          "anim": "flow",
+          "size": "220% 220%",
+          "css": "linear-gradient(115deg,#fffdf6 0%,#f7e9cd 22%,#e9d3a6 44%,#fdf6e8 62%,#e3caa0 82%,#fffdf6 100%)"
+        },
+        {
+          "id": "aurora-night",
+          "name": "Aurora night",
+          "mode": "pattern",
+          "anim": "flow",
+          "size": "220% 220%",
+          "dark": true,
+          "css": "linear-gradient(115deg,#0b0a10 0%,#1b1622 26%,#2a2130 48%,#141019 66%,#251d2c 84%,#08070c 100%)"
+        },
+        {
+          "id": "silk-drape",
+          "name": "Silk drape",
+          "mode": "pattern",
+          "anim": "drift",
+          "size": "180% 180%",
+          "css": "repeating-linear-gradient(118deg,#fffdf8 0 26px,#f7eeda 26px 52px,#fdf6e6 52px 78px,#f1e4c8 78px 104px)"
+        },
+        {
+          "id": "silk-night",
+          "name": "Silk night",
+          "mode": "pattern",
+          "anim": "drift",
+          "size": "180% 180%",
+          "dark": true,
+          "css": "repeating-linear-gradient(118deg,#0a0810 0 26px,#141020 26px 52px,#0d0a14 52px 78px,#1a1426 78px 104px)"
+        },
+        {
+          "id": "marble-ivory",
+          "name": "Ivory marble",
+          "mode": "pattern",
+          "anim": "drift",
+          "size": "190% 190%",
+          "css": "linear-gradient(135deg,#fffefa 0%,#f8f3e8 30%,#efe6d3 55%,#fbf6ec 78%,#f2e9d8 100%),repeating-linear-gradient(72deg,rgba(201,165,78,.10) 0 2px,rgba(255,255,255,0) 2px 26px)"
+        },
+        {
+          "id": "marble-noir",
+          "name": "Noir marble",
+          "mode": "pattern",
+          "anim": "drift",
+          "size": "190% 190%",
+          "dark": true,
+          "css": "linear-gradient(135deg,#100d14 0%,#1b1622 30%,#251d2e 55%,#120f18 78%,#1e1826 100%),repeating-linear-gradient(72deg,rgba(201,165,78,.16) 0 2px,rgba(255,255,255,0) 2px 30px)"
+        },
+        {
+          "id": "damask",
+          "name": "Damask gold",
+          "mode": "pattern",
+          "anim": "pulse",
+          "size": "150% 150%",
+          "css": "radial-gradient(120% 90% at 50% 25%,#fffdf7 0%,#f7eeda 45%,#ead9b7 100%),repeating-radial-gradient(circle at 25% 25%,rgba(201,165,78,.16) 0 6px,rgba(255,255,255,0) 6px 26px)"
+        },
+        {
+          "id": "lattice",
+          "name": "Gold lattice",
+          "mode": "pattern",
+          "anim": "pulse",
+          "size": "160% 160%",
+          "css": "radial-gradient(120% 90% at 50% 30%,#fffdf8 0%,#f9f1e2 50%,#eddfc2 100%),repeating-linear-gradient(45deg,rgba(201,165,78,.14) 0 1px,transparent 1px 24px),repeating-linear-gradient(-45deg,rgba(201,165,78,.14) 0 1px,transparent 1px 24px)"
+        },
+        {
+          "id": "bokeh",
+          "name": "Golden bokeh",
+          "mode": "pattern",
+          "anim": "float",
+          "size": "170% 170%",
+          "css": "radial-gradient(circle at 22% 28%,rgba(228,198,132,.55) 0 42px,transparent 43px),radial-gradient(circle at 78% 22%,rgba(228,198,132,.40) 0 30px,transparent 31px),radial-gradient(circle at 62% 78%,rgba(228,198,132,.45) 0 56px,transparent 57px),radial-gradient(circle at 12% 82%,rgba(228,198,132,.35) 0 26px,transparent 27px),linear-gradient(160deg,#fffdf7,#f3e7cd 60%,#e6d3ad)"
+        },
+        {
+          "id": "bokeh-night",
+          "name": "Bokeh noir",
+          "mode": "pattern",
+          "anim": "float",
+          "size": "170% 170%",
+          "dark": true,
+          "css": "radial-gradient(circle at 22% 28%,rgba(201,165,78,.35) 0 42px,transparent 43px),radial-gradient(circle at 78% 22%,rgba(201,165,78,.26) 0 30px,transparent 31px),radial-gradient(circle at 62% 78%,rgba(201,165,78,.30) 0 56px,transparent 57px),linear-gradient(160deg,#0d0b11,#1a1520 60%,#0a0810)"
+        },
+        {
+          "id": "emerald-ornate",
+          "name": "Emerald ornate",
+          "mode": "pattern",
+          "anim": "pulse",
+          "size": "160% 160%",
+          "dark": true,
+          "css": "radial-gradient(110% 80% at 50% 20%,#12302a 0%,#0b1d19 55%,#050d0b 100%),repeating-linear-gradient(45deg,rgba(201,165,78,.12) 0 1px,transparent 1px 28px),repeating-linear-gradient(-45deg,rgba(201,165,78,.12) 0 1px,transparent 1px 28px)"
+        },
+        {
+          "id": "burgundy-ornate",
+          "name": "Burgundy ornate",
+          "mode": "pattern",
+          "anim": "pulse",
+          "size": "160% 160%",
+          "dark": true,
+          "css": "radial-gradient(110% 80% at 50% 20%,#3a1420 0%,#230c14 55%,#0d0509 100%),repeating-radial-gradient(circle at 30% 30%,rgba(201,165,78,.14) 0 5px,transparent 5px 28px)"
+        },
+        {
+          "id": "royal-gold",
+          "name": "Royal gold night",
+          "mode": "pattern",
+          "anim": "shimmer",
+          "size": "200% 200%",
+          "dark": true,
+          "css": "linear-gradient(150deg,#0c0910 0%,#1a1424 35%,#241a2c 60%,#0b0810 100%),repeating-linear-gradient(60deg,rgba(201,165,78,.18) 0 1px,transparent 1px 34px)"
+        },
+        {
+          "id": "rose-ornate",
+          "name": "Rose ornate",
+          "mode": "pattern",
+          "anim": "float",
+          "size": "170% 170%",
+          "css": "radial-gradient(circle at 70% 26%,rgba(226,178,158,.45) 0 46px,transparent 47px),radial-gradient(circle at 24% 74%,rgba(226,178,158,.36) 0 34px,transparent 35px),linear-gradient(150deg,#fff8f4,#f8e6dc 55%,#eed6c9)"
+        },
+        {
+          "id": "pearl-ornate",
+          "name": "Pearl ornate",
+          "mode": "pattern",
+          "anim": "shimmer",
+          "size": "190% 190%",
+          "css": "linear-gradient(140deg,#ffffff 0%,#f7f4ec 35%,#efe9dc 65%,#ffffff 100%),repeating-linear-gradient(30deg,rgba(201,165,78,.10) 0 1px,transparent 1px 30px)"
+        }
+      ],
+      "activeWallpaper": "crystal"
+    },
+    "hero": {
+      "autoplay": true,
+      "intervalSec": 3,
+      "posters": [
+        {
+          "id": "py04931",
+          "url": "/assets/img/posters/poster-1.webp",
+          "alt": "Z&Z luxury bridal campaign — ivory and gold bridal lehenga"
+        },
+        {
+          "id": "pbyqfb2",
+          "url": "/assets/img/posters/poster-2.webp",
+          "alt": "Z&Z formal wear — maroon and gold embroidered couture"
+        }
+      ]
+    },
+    "hotSelling": {
+      "enabled": true,
+      "mode": "best",
+      "collectionId": "",
+      "layout": "wheel",
+      "limit": 12,
+      "title": "Most Loved This Season"
+    },
+    "collectionPage": {
+      "layout": "wheel",
+      "title": "Collections"
+    },
+    "valuable": {
+      "enabled": true,
+      "delayMs": 3500,
+      "title": "Become Our Valuable Customer",
+      "text": "Join the Z&Z inner circle — early access to new bridal drops, private sale invites and special member discounts."
+    },
+    "currency": {
+      "enabled": true,
+      "base": "PKR",
+      "list": [
+        {
+          "code": "PKR",
+          "symbol": "Rs",
+          "rate": 1
+        },
+        {
+          "code": "USD",
+          "symbol": "$",
+          "rate": 0.0036
+        },
+        {
+          "code": "SAR",
+          "symbol": "SAR",
+          "rate": 0.0135
+        },
+        {
+          "code": "AED",
+          "symbol": "AED",
+          "rate": 0.0132
+        },
+        {
+          "code": "GBP",
+          "symbol": "£",
+          "rate": 0.0028
+        }
+      ],
+      "live": true
+    },
+    "terms": {
+      "text": "",
+      "image": ""
+    },
+    "about": {
+      "heading": "The House of Z&Z",
+      "text": "Z&Z is a couture house for the modern bride — hand-embellished bridals and formals crafted by master artisans, made to measure for your most important days.",
+      "image": ""
+    },
+    "branches": [],
+    "order": {
+      "thankYou": "Thank you for your order! Please attend our call for order confirmation — our team will contact you shortly."
+    },
+    "seo": {
+      "title": "Z&Z — Luxury Bridal Dresses, Barat, Walima & Mehndi Wear in Pakistan",
+      "description": "Shop luxury Pakistani bridal dresses at Z&Z. Hand-embroidered barat lehengas, walima gowns, mehndi wear and party formals. Nationwide delivery, made to measure couture.",
+      "keywords": "bridal dresses, pakistani bridal dresses, barat lehenga, walima dress, mehndi dress, party wear, luxury bridal wear, Z&Z bridals, bridal couture pakistan"
+    },
+    "permissions": {
+      "adminSeesCustomerPhotos": true,
+      "adminCanPosters": true,
+      "adminCanCollections": true,
+      "adminCanItems": true,
+      "adminCanHome": true,
+      "adminCanLook": true,
+      "adminCanContact": true,
+      "adminCanPages": true,
+      "adminCanSecurity": true,
+      "adminCanWallpapers": false,
+      "adminCanInbox": true,
+      "adminCanAds": false
+    },
+    "layout": {
+      "collectionPage": "grid",
+      "homeLoved": "grid",
+      "showWheel": false
+    },
+    "animations": {
+      "logo": "spin",
+      "logoSeconds": 9,
+      "transition": "fade",
+      "cardTransition": "zoom",
+      "gridHover": "lift",
+      "wheelStyle": "half"
+    },
+    "bubbles": {
+      "count": 38,
+      "sideBias": true,
+      "styles": "glass",
+      "burst": true,
+      "speed": 1,
+      "quality": "high",
+      "glitter": true,
+      "glitterAmount": 260,
+      "glitterFall": 1
+    },
+    "look": {
+      "enabled": true,
+      "heading": "Try-On Studio",
+      "intro": "See our couture on your own photo — fitted to your body in moments.",
+      "instructions": "Full body, head to feet, face visible, no dupatta. Plain bright wall behind you.",
+      "background": "/assets/img/look/garden.webp",
+      "showToAdmin": true
+    },
+    "ads": {
+      "enabled": true,
+      "items": []
+    },
+    "live": {
+      "show": true,
+      "floor": 7,
+      "label": "browsing now"
+    }
+  },
+  "collections": [
+    {
+      "id": "barat",
+      "name": "Barat Wear",
+      "order": 1,
+      "enabled": true,
+      "image": "/assets/img/collections/barat.webp",
+      "banner": "/assets/img/posters/poster-2.webp",
+      "description": "Heirloom reds, deep emerald and antique gold — the Z&Z barat edit.",
+      "items": [
+        {
+          "id": "zohra",
+          "name": "Zohra — Crimson Zardozi Lehenga",
+          "price": 285000,
+          "order": 1,
+          "desc": "Deep crimson raw silk lehenga with hand zardozi, dabka and sequin work. Includes heavily worked dupatta and worked bodice.",
+          "images": [
+            "/assets/img/dresses/barat-1.webp",
+            "/assets/img/collections/barat.webp"
+          ],
+          "views": 6,
+          "tags": [
+            "bridal",
+            "barat"
+          ]
+        },
+        {
+          "id": "noor",
+          "name": "Noor — Emerald Velvet Bridal",
+          "price": 0,
+          "order": 2,
+          "desc": "Emerald velvet bridal with antique gold dabka and kora work. Price on request — contact us on WhatsApp.",
+          "images": [
+            "/assets/img/collections/barat.webp"
+          ],
+          "views": 0,
+          "tags": [
+            "bridal",
+            "barat"
+          ]
+        },
+        {
+          "id": "meher",
+          "name": "Meher — Ruby Velvet Bridal",
+          "price": 320000,
+          "desc": "Ruby red velvet bridal with antique gold dabka, kora and sequin work. Includes a four-sided heavily worked dupatta.",
+          "images": [
+            "/assets/img/dresses/barat-2.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/barat-2-sm.webp"
+          ],
+          "order": 3,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "gulbahar",
+          "name": "Gulbahar — Scarlet Zardozi",
+          "price": 265000,
+          "desc": "Scarlet raw silk lehenga with silver-gold zardozi and a draped dupatta. Made to measure in 3–4 weeks.",
+          "images": [
+            "/assets/img/dresses/barat-3.webp",
+            "/assets/img/dresses/barat-5.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/barat-3-sm.webp",
+            "/assets/img/dresses/barat-5-sm.webp"
+          ],
+          "order": 4,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "rania",
+          "name": "Rania — Rust Organza Bridal",
+          "price": 240000,
+          "desc": "Rust organza bridal with hand-cut gold appliqué. Light on the shoulders, dramatic in movement.",
+          "images": [
+            "/assets/img/dresses/barat-4.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/barat-4-sm.webp"
+          ],
+          "order": 5,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "shabnam",
+          "name": "Shabnam — Plum Velvet Lehenga",
+          "price": 0,
+          "desc": "Plum velvet with deep gold embroidery. Price shared privately — message us on WhatsApp.",
+          "images": [
+            "/assets/img/dresses/barat-5.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/barat-5-sm.webp"
+          ],
+          "order": 6,
+          "views": 0,
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "walima",
+      "name": "Walima Wear",
+      "order": 2,
+      "enabled": true,
+      "image": "/assets/img/collections/walima.webp",
+      "banner": "",
+      "description": "Ivory, pearl and blush — softly glowing walima couture.",
+      "items": [
+        {
+          "id": "mahtab",
+          "name": "Mahtab — Ivory Pearl Gown",
+          "price": 178000,
+          "order": 1,
+          "desc": "Ivory organza gown with delicate gold thread work and pearl detailing, finished with a soft tulle dupatta.",
+          "images": [
+            "/assets/img/dresses/walima-1.webp",
+            "/assets/img/collections/walima.webp"
+          ],
+          "views": 2,
+          "tags": [
+            "walima",
+            "formal"
+          ]
+        },
+        {
+          "id": "sitara",
+          "name": "Sitara — Blush Pearl Gown",
+          "price": 168000,
+          "desc": "Blush gown with pearl and sequin hand work, softly flared hem and matching dupatta.",
+          "images": [
+            "/assets/img/dresses/walima-2.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/walima-2-sm.webp"
+          ],
+          "order": 2,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "nazm",
+          "name": "Nazm — Golden Ivory Gown",
+          "price": 195000,
+          "desc": "Ivory gown with gold thread work and a tulle dupatta that catches the light.",
+          "images": [
+            "/assets/img/dresses/walima-3.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/walima-3-sm.webp"
+          ],
+          "order": 3,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "aab",
+          "name": "Aab — Champagne Ivory",
+          "price": 210000,
+          "desc": "Champagne tissue gown with delicate gold zari. Understated, luminous walima couture.",
+          "images": [
+            "/assets/img/dresses/walima-4.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/walima-4-sm.webp"
+          ],
+          "order": 4,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "laila",
+          "name": "Laila — Lilac Blush Gown",
+          "price": 0,
+          "desc": "Lilac blush gown with silver embroidery. Price on request.",
+          "images": [
+            "/assets/img/dresses/walima-5.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/walima-5-sm.webp"
+          ],
+          "order": 5,
+          "views": 0,
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "mehndi",
+      "name": "Mehndi Wear",
+      "order": 3,
+      "enabled": true,
+      "image": "/assets/img/collections/mehndi.webp",
+      "banner": "",
+      "description": "Vivid chartreuse, mirror work and gota — made to dance in.",
+      "items": [
+        {
+          "id": "sahar",
+          "name": "Sahar — Chartreuse Mirror Lehenga",
+          "price": 96000,
+          "order": 1,
+          "desc": "Chartreuse silk lehenga with hand mirror work and gold gota edging. Lightweight and made to twirl.",
+          "images": [
+            "/assets/img/dresses/mehndi-1.webp",
+            "/assets/img/collections/mehndi.webp"
+          ],
+          "views": 0,
+          "tags": [
+            "mehndi"
+          ]
+        },
+        {
+          "id": "rang",
+          "name": "Rang — Mustard Gharara",
+          "price": 96000,
+          "desc": "Mustard gharara with gota and mirror work, paired with a fuchsia dupatta.",
+          "images": [
+            "/assets/img/dresses/mehndi-2.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/mehndi-2-sm.webp"
+          ],
+          "order": 2,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "bahar",
+          "name": "Bahar — Emerald Mirror Lehenga",
+          "price": 112000,
+          "desc": "Emerald green lehenga with real mirror work and gold edging. Made to dance.",
+          "images": [
+            "/assets/img/dresses/mehndi-3.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/mehndi-3-sm.webp"
+          ],
+          "order": 3,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "sona",
+          "name": "Sona — Amber Lehnga",
+          "price": 88000,
+          "desc": "Amber and gold lehnga in lightweight silk — perfect for long mehndi nights.",
+          "images": [
+            "/assets/img/dresses/mehndi-4.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/mehndi-4-sm.webp"
+          ],
+          "order": 4,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "mori",
+          "name": "Mori — Teal Chiffon Mehndi",
+          "price": 0,
+          "desc": "Teal chiffon with mirror embroidery. Price on request.",
+          "images": [
+            "/assets/img/dresses/mehndi-5.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/mehndi-5-sm.webp"
+          ],
+          "order": 5,
+          "views": 0,
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "party",
+      "name": "Party Wear",
+      "order": 4,
+      "enabled": true,
+      "image": "/assets/img/collections/party.webp",
+      "banner": "",
+      "description": "Champagne shimmer and modern silhouettes for evenings.",
+      "items": [
+        {
+          "id": "lumen",
+          "name": "Lumen — Champagne Sequin Gown",
+          "price": 62000,
+          "order": 1,
+          "desc": "Liquid champagne sequins with a draped shoulder and fitted silhouette. Fully lined.",
+          "images": [
+            "/assets/img/dresses/party-1.webp",
+            "/assets/img/collections/party.webp"
+          ],
+          "views": 1,
+          "tags": [
+            "party"
+          ]
+        },
+        {
+          "id": "aurum",
+          "name": "Aurum — Rose Gold Pleat",
+          "price": 72000,
+          "desc": "Rose gold pleated gown with a soft cowl neck and a sweeping hem.",
+          "images": [
+            "/assets/img/dresses/party-3.webp",
+            "/assets/img/dresses/party-5.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/party-3-sm.webp",
+            "/assets/img/dresses/party-5-sm.webp"
+          ],
+          "order": 2,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "nocturne",
+          "name": "Nocturne — Onyx Beaded Gown",
+          "price": 84000,
+          "desc": "Black beaded gown with one-shoulder draping and a fluid column silhouette.",
+          "images": [
+            "/assets/img/dresses/party-2.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/party-2-sm.webp"
+          ],
+          "order": 3,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "verdant",
+          "name": "Verdant — Emerald Drape",
+          "price": 78000,
+          "desc": "Emerald satin drape gown with a hidden waist tie.",
+          "images": [
+            "/assets/img/dresses/party-4.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/party-4-sm.webp"
+          ],
+          "order": 4,
+          "views": 0,
+          "tags": []
+        },
+        {
+          "id": "copper",
+          "name": "Copper — Rose Copper Shimmer",
+          "price": 66000,
+          "desc": "Copper shimmer cocktail gown with fine pleats and a fitted bodice.",
+          "images": [
+            "/assets/img/dresses/party-5.webp"
+          ],
+          "thumbs": [
+            "/assets/img/dresses/party-5-sm.webp"
+          ],
+          "order": 5,
+          "views": 0,
+          "tags": []
+        }
+      ]
+    }
+  ],
+  "leads": [],
+  "complaints": [],
+  "ratings": [],
+  "orders": [],
+  "subscribers": [],
+  "looks": [],
+  "owner": {
+    "username": "1234567890123",
+    "passSalt": "b94d9e3ecc2bd12054f0b812a83c273a",
+    "passHash": "6bcce35bd2fe614cbcba1466d651dd982d03a2572bf20d442352aeb5b4960f0c2f786b362000833a817a22b257e1f06a0e8091fc00693012856203047c4cbbaf",
+    "pinSalt": "a968767da2cd881843c57d3b6b45ce27",
+    "pinHash": "9dcf769edddea811c6c2c074040810a20dcdd5f487d6584351b03d5a5646b0091262a775fb6819c90bc384e7d19f261735b342c89ad36affe03001993b655fd8",
+    "updatedAt": "2026-10-25T06:56:20.805Z"
+  },
+  "tryons": []
+}

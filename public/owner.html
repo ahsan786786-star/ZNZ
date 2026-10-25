@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Z&amp;Z · Owner Panel</title>
+<link rel="icon" href="/assets/img/logo-mark.png" />
+<link rel="stylesheet" href="/assets/fonts/fonts.css" />
+<link rel="stylesheet" href="/assets/css/admin.css?v=__V__" />
+<style>
+  .role-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 11px; border-radius:999px;
+    background:linear-gradient(135deg,#e8cf8a,#c9a54e 55%,#a5822f); color:#241c0b; font-size:9.5px;
+    letter-spacing:.18em; text-transform:uppercase; font-weight:600; }
+  .owner-card { border:1px solid rgba(201,165,78,.55); background:linear-gradient(160deg,#fffdf6,#faf2e2); }
+  .wp-grid { display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
+  .wp { border-radius:12px; overflow:hidden; border:1px solid var(--line); cursor:pointer; position:relative; }
+  .wp i { display:block; height:74px; }
+  .wp span { display:block; padding:6px 8px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; background:#fffdf8; }
+  .wp.on { border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,165,78,.35); }
+  .wp.on span::after { content:' ✓'; color:var(--gold-2); }
+  .look-grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
+  .look-card { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fffdf8; }
+  .look-card img { width:100%; height:190px; object-fit:cover; }
+  .look-card .m { padding:8px 10px; font-size:10.5px; color:var(--ink-3); letter-spacing:.08em; }
+  .live-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#2fae6b; margin-left:6px;
+    box-shadow:0 0 0 0 rgba(47,174,107,.55); animation:livePulse 2.4s infinite; }
+  @keyframes livePulse { 0%{box-shadow:0 0 0 0 rgba(47,174,107,.5)} 70%{box-shadow:0 0 0 9px rgba(47,174,107,0)} 100%{box-shadow:0 0 0 0 rgba(47,174,107,0)} }
+  .live-num { font-family:'Cormorant Garamond',serif; font-size:54px; line-height:1; color:var(--gold-2); font-variant-numeric:tabular-nums; min-width:2ch; }
+  .live-count { font-size:10px; letter-spacing:.06em; color:#2fae6b; font-weight:600; margin-left:4px; }
+  .live-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); }
+  .live-row:last-child { border-bottom:0; }
+  .live-row h4 { margin:0; font-family:'Cormorant Garamond',serif; font-size:16px; letter-spacing:.04em; text-transform:none; color:#2c2317; }
+  .live-row p { margin:3px 0 0; font-size:10.5px; letter-spacing:.08em; color:#8a7a5e; }
+  .ad-row { border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px; background:#fffdf8; }
+  .ad-row .ad-head { display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .ad-row img.ad-thumb, .ad-row video.ad-thumb { width:120px; height:64px; object-fit:cover; border-radius:8px; border:1px solid var(--line); }
+  .perm { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .perm:last-child { border-bottom:0; }
+</style>
+</head>
+<body>
+
+<section id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <img src="/assets/img/logo-3d@2x.png" alt="Z&Z" />
+      <div><b>Z&amp;Z</b><i>Owner Panel</i></div>
+    </div>
+    <p class="login-sub">Owner access — full control of the store and of the admin panel.</p>
+    <form id="loginForm" autocomplete="off">
+      <label class="fld"><span>Owner ID</span><input id="lgUser" required autocomplete="username" placeholder="1234567890123" /></label>
+      <label class="fld"><span>Password</span><input id="lgPass" type="password" required autocomplete="current-password" /></label>
+      <label class="fld"><span>6-digit PIN</span><input id="lgPin" inputmode="numeric" maxlength="6" required placeholder="••••••" /></label>
+      <button class="btn gold block" type="submit" id="lgBtn">Enter owner panel</button>
+      <div class="msg" id="lgMsg"></div>
+    </form>
+    <a class="back" href="/">← Back to store</a>
+  </div>
+</section>
+
+<div id="panel" class="panel" hidden>
+  <aside class="side">
+    <div class="side-brand">
+      <img src="/assets/img/logo-3d@2x.png" alt="Z&Z" />
+      <div><b>Z&amp;Z</b><i>Owner Room</i></div>
+    </div>
+    <nav class="side-nav" id="sideNav">
+      <button data-tab="dashboard" class="on">Dashboard</button>
+      <button data-tab="admin">Admin control</button>
+      <button data-tab="access">Access &amp; privacy</button>
+      <button data-tab="wallpapers">Entrance wallpapers</button>
+      <button data-tab="ads">Advertisements</button>
+      <button data-tab="live">Live visitors <span class="live-count" id="navLiveCount"></span><span class="live-dot" id="liveDot"></span></button>
+      <button data-tab="motion">Layout &amp; motion</button>
+      <button data-tab="posters">Posters &amp; hero</button>
+      <button data-tab="collections">Collections</button>
+      <button data-tab="items">Dresses &amp; prices</button>
+      <button data-tab="home">Home sections</button>
+      <button data-tab="looks">Try-on photos</button>
+      <button data-tab="inbox">All customer data</button>
+      <button data-tab="look">Try-on page setup</button>
+      <button data-tab="contact">Contact &amp; social</button>
+      <button data-tab="pages">About / Terms / SEO</button>
+      <button data-tab="security">Owner security</button>
+      <button data-tab="backup">Backup &amp; restore</button>
+    </nav>
+    <div class="side-foot">
+      <a href="/" target="_blank" rel="noopener">View store ↗</a>
+      <a href="/admin" target="_blank" rel="noopener">Admin panel ↗</a>
+      <button id="logoutBtn">Log out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button id="sideToggle" class="side-toggle" aria-label="Toggle menu">☰</button>
+      <h1 id="tabTitle">Dashboard</h1>
+      <div class="top-actions">
+        <span class="role-badge">Owner</span>
+        <span class="who" id="who"></span>
+        <span class="saved" id="savedFlag"></span>
+      </div>
+    </header>
+    <div id="tabBody" class="tab-body"></div>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<input type="file" id="hiddenFile" hidden multiple accept="image/*,video/mp4,video/webm,video/quicktime" />
+<div id="pickModal" class="pick-modal" hidden></div>
+
+<script src="/assets/js/owner.js?v=__V__" defer></script>
+</body>
+</html>

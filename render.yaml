@@ -1,0 +1,20 @@
+# One-click blueprint for Render (free plan).
+# In Render:  New +  →  Blueprint  →  pick this repository  →  Apply.
+services:
+  - type: web
+    name: znz-luxury-bridals
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    buildCommand: npm ci --omit=dev --no-audit --no-fund || npm install --omit=dev --no-audit --no-fund
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.1
+      # set these two in the dashboard to keep settings + photos in your GitHub repo
+      - key: GH_REPO
+        sync: false
+      - key: GH_TOKEN
+        sync: false
