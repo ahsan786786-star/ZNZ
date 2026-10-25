@@ -75,9 +75,9 @@ function precompress() {
       if (!/\.(css|js|json|svg|webmanifest|txt|xml)$/i.test(d.name)) continue;
       const gz = full + '.gz';
       try {
-        const src = fs.statSync(full);
-        const ok = fs.existsSync(gz) && fs.statSync(gz).mtimeMs >= src.mtimeMs;
-        if (!ok) fs.writeFileSync(gz, zlib.gzipSync(fs.readFileSync(full), { level: 9 }));
+        /* Always rebuild: a stale .gz copied from an older build (all files get the
+           same mtime after a git checkout) would otherwise be served for months. */
+        fs.writeFileSync(gz, zlib.gzipSync(fs.readFileSync(full), { level: 9 }));
       } catch (e) { /* ignore */ }
     }
   };

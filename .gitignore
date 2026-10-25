@@ -7,3 +7,6 @@ data/db.json.tmp
 .env
 .env.*
 .vscode/
+
+# pre-compressed copies are generated at boot — never commit them
+*.gz
