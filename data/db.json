@@ -748,9 +748,9 @@
       "name": "Party Wear",
       "order": 4,
       "enabled": true,
-      "image": "/assets/img/collections/party.webp",
-      "banner": "",
-      "description": "Champagne shimmer and modern silhouettes for evenings.",
+      "image": "/uploads/mvp1t57wf7ef0325.webp",
+      "banner": "/uploads/mvp1tfxxc5625cfc.webp",
+      "description": "Champagne shimmer and modern silhouettes for evening's glow.",
       "items": [
         {
           "id": "lumen",
@@ -829,7 +829,8 @@
           "views": 0,
           "tags": []
         }
-      ]
+      ],
+      "video": ""
     }
   ],
   "leads": [
