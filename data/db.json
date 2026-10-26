@@ -593,7 +593,7 @@
       "name": "Walima Wear",
       "order": 2,
       "enabled": true,
-      "image": "/assets/img/collections/walima.webp",
+      "image": "/uploads/mvpfyxq3ee1dc028.webp",
       "banner": "",
       "description": "Ivory, pearl and blush — softly glowing walima couture.",
       "items": [
@@ -673,7 +673,8 @@
           "views": 0,
           "tags": []
         }
-      ]
+      ],
+      "video": ""
     },
     {
       "id": "mehndi",
