@@ -934,5 +934,20 @@
     "pinHash": "d0faac3096016ff498b4c73ebe463c3a2c08b7d7396f75e87fd97a29d1ddd4690835769adc93ea8be2676d756f462422bf5c41dd129d7700a679d6d9c918626a",
     "updatedAt": "2026-10-26T11:53:54.707Z"
   },
-  "tryons": []
+  "tryons": [
+    {
+      "id": "trymvpeg56i56ea54",
+      "kind": "tryon",
+      "url": "/uploads/looks/trymvpeg56i56ea54.webp",
+      "thumb": "/uploads/looks/trymvpeg56i56ea54-sm.webp",
+      "photo": "/uploads/looks/trymvpeg56i56ea54-photo.webp",
+      "itemId": "zohra",
+      "collectionId": "barat",
+      "itemName": "Zohra — Crimson Zardozi Lehenga",
+      "background": "Green lawn",
+      "quality": "4k",
+      "visitor": "1d4ed74fc998c60f5c",
+      "createdAt": "2026-10-26T15:16:28.037Z"
+    }
+  ]
 }
