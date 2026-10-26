@@ -499,14 +499,17 @@
           "order": 1,
           "desc": "Deep crimson raw silk lehenga with hand zardozi, dabka and sequin work. Includes heavily worked dupatta and worked bodice.",
           "images": [
-            "/assets/img/dresses/barat-1.webp",
-            "/assets/img/collections/barat.webp"
+            "/uploads/mvph93ds58343690.webp"
           ],
           "views": 6,
           "tags": [
             "bridal",
             "barat"
-          ]
+          ],
+          "thumbs": [
+            "/uploads/mvph93ds58343690-sm.webp"
+          ],
+          "video": ""
         },
         {
           "id": "noor",
