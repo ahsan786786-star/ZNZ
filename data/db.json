@@ -442,7 +442,7 @@
       "logo": "spin",
       "logoSeconds": 9,
       "transition": "fade",
-      "cardTransition": "zoom",
+      "cardTransition": "flip",
       "gridHover": "lift",
       "wheelStyle": "half"
     },
