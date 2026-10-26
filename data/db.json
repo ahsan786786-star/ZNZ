@@ -1,11 +1,11 @@
 {
   "admin": {
-    "username": "admin",
-    "passSalt": "13ec4d792418059358a6270cb2672f57",
-    "passHash": "88257c3e332a28f36d6c6c9ccb2a6f5aabd882471552282ece3e6526a032c66fb12e434d09ce29bf491a6c4787138ffd16a5642406046d32f2b786e3b3e9d11d",
-    "pinSalt": "7791ac348f0cf154fc2d81e5752a2296",
-    "pinHash": "693b55047b8042750cf99bd0025ba23dff4e43de8dc7e07571533436064f2894cc23bc8af7174933b7ba962150eabb68951c74652da1fe9e9ca81cee4c808ca8",
-    "updatedAt": "2026-10-26T11:53:54.616Z"
+    "username": "zani@2726",
+    "passSalt": "f5c5a39246f05fc566a0f1a889e8b011",
+    "passHash": "c5d7261a14573436656deab1696474d6df4107da75d2753f4d58423ef89067a426ecf07b9fe5c59a57f8cd7fa4f21cbae828e45c8fae9c92bbca79e76b493741",
+    "pinSalt": "0fe05fed14d663fa736e4dc838f1facc",
+    "pinHash": "55b65f622574ed638dc457b3640047dd0e816cc759afa01bdecac1a111fbd0f17b6947002685b14339dd7ec2cc78b13ff5419a0fee69e85e7e40c75b24a17134",
+    "updatedAt": "2026-10-26T20:30:05.814Z"
   },
   "settings": {
     "brand": {
