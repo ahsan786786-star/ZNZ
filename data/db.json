@@ -669,66 +669,6 @@
           "tags": [
             "mehndi"
           ]
-        },
-        {
-          "id": "rang",
-          "name": "Rang — Mustard Gharara",
-          "price": 96000,
-          "desc": "Mustard gharara with gota and mirror work, paired with a fuchsia dupatta.",
-          "images": [
-            "/assets/img/dresses/mehndi-2.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/mehndi-2-sm.webp"
-          ],
-          "order": 2,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "bahar",
-          "name": "Bahar — Emerald Mirror Lehenga",
-          "price": 112000,
-          "desc": "Emerald green lehenga with real mirror work and gold edging. Made to dance.",
-          "images": [
-            "/assets/img/dresses/mehndi-3.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/mehndi-3-sm.webp"
-          ],
-          "order": 3,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "sona",
-          "name": "Sona — Amber Lehnga",
-          "price": 88000,
-          "desc": "Amber and gold lehnga in lightweight silk — perfect for long mehndi nights.",
-          "images": [
-            "/assets/img/dresses/mehndi-4.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/mehndi-4-sm.webp"
-          ],
-          "order": 4,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "mori",
-          "name": "Mori — Teal Chiffon Mehndi",
-          "price": 0,
-          "desc": "Teal chiffon with mirror embroidery. Price on request.",
-          "images": [
-            "/assets/img/dresses/mehndi-5.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/mehndi-5-sm.webp"
-          ],
-          "order": 5,
-          "views": 0,
-          "tags": []
         }
       ],
       "video": ""
