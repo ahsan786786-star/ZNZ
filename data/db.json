@@ -874,28 +874,7 @@
   ],
   "complaints": [],
   "ratings": [],
-  "orders": [
-    {
-      "id": "ZNZ-7EC1AD",
-      "name": "Tehreem Hafeez",
-      "phone": "03492294946",
-      "city": "Pakpatan",
-      "note": "Dito same",
-      "currency": "PKR",
-      "items": [
-        {
-          "collectionId": "party",
-          "itemId": "lumen",
-          "name": "Lumen — Champagne Sequin Gown",
-          "image": "/assets/img/dresses/party-1-sm.webp",
-          "price": 62000,
-          "qty": 1
-        }
-      ],
-      "status": "new",
-      "createdAt": "2026-10-26T08:24:05.129Z"
-    }
-  ],
+  "orders": [],
   "subscribers": [],
   "looks": [],
   "owner": {
