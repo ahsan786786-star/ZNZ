@@ -38,7 +38,7 @@
       "pinterest": ""
     },
     "theme": {
-      "bgLight": "#f7f2e8",
+      "bgLight": "#ffffff",
       "bgDark": "#08080a",
       "gold": "#c9a54e",
       "goldDeep": "#8a6a26",
@@ -323,21 +323,31 @@
           "css": "linear-gradient(140deg,#ffffff 0%,#f7f4ec 35%,#efe9dc 65%,#ffffff 100%),repeating-linear-gradient(30deg,rgba(201,165,78,.10) 0 1px,transparent 1px 30px)"
         }
       ],
-      "activeWallpaper": "crystal"
+      "activeWallpaper": "aurora-gold"
     },
     "hero": {
       "autoplay": true,
       "intervalSec": 3,
       "posters": [
         {
-          "id": "py04931",
-          "url": "/assets/img/posters/poster-1.webp",
-          "alt": "Z&Z luxury bridal campaign — ivory and gold bridal lehenga"
+          "id": "pmvp2dmar0",
+          "url": "/uploads/mvp2dlgeffa1c365.webp",
+          "alt": ""
         },
         {
-          "id": "pbyqfb2",
-          "url": "/assets/img/posters/poster-2.webp",
-          "alt": "Z&Z formal wear — maroon and gold embroidered couture"
+          "id": "pmvp2h00z1",
+          "url": "/uploads/mvp2gu50236b2290.webp",
+          "alt": ""
+        },
+        {
+          "id": "pmvp1yj3b0",
+          "url": "/uploads/mvp1yi9y7def4b5d.webp",
+          "alt": ""
+        },
+        {
+          "id": "pmvp2h00z0",
+          "url": "/uploads/mvp2gnbtbfbb596d.webp",
+          "alt": ""
         }
       ]
     },
@@ -424,15 +434,15 @@
       "adminCanAds": false
     },
     "layout": {
-      "collectionPage": "grid",
-      "homeLoved": "grid",
+      "collectionPage": "wheel",
+      "homeLoved": "wheel",
       "showWheel": false
     },
     "animations": {
       "logo": "spin",
       "logoSeconds": 9,
       "transition": "fade",
-      "cardTransition": "zoom",
+      "cardTransition": "flip",
       "gridHover": "lift",
       "wheelStyle": "half"
     },
@@ -755,9 +765,9 @@
       "name": "Party Wear",
       "order": 4,
       "enabled": true,
-      "image": "/assets/img/collections/party.webp",
-      "banner": "",
-      "description": "Champagne shimmer and modern silhouettes for evenings.",
+      "image": "/uploads/mvp1t57wf7ef0325.webp",
+      "banner": "/uploads/mvp1tfxxc5625cfc.webp",
+      "description": "Champagne shimmer and modern silhouettes for evening's glow.",
       "items": [
         {
           "id": "lumen",
@@ -836,13 +846,84 @@
           "views": 0,
           "tags": []
         }
-      ]
+      ],
+      "video": ""
     }
   ],
-  "leads": [],
+  "leads": [
+    {
+      "id": "lmvozrem2obhh2",
+      "type": "order",
+      "name": "Tehreem Hafeez",
+      "contact": "03492294946",
+      "message": "Order ZNZ-F4CBE3",
+      "page": "/checkout",
+      "createdAt": "2026-10-26T08:25:15.962Z",
+      "read": false
+    },
+    {
+      "id": "lmvozpvyhflgi4",
+      "type": "order",
+      "name": "Tehreem Hafeez",
+      "contact": "03492294946",
+      "message": "Order ZNZ-7EC1AD",
+      "page": "/checkout",
+      "createdAt": "2026-10-26T08:24:05.129Z",
+      "read": false
+    }
+  ],
   "complaints": [],
   "ratings": [],
-  "orders": [],
+  "orders": [
+    {
+      "id": "ZNZ-F4CBE3",
+      "name": "Tehreem Hafeez",
+      "phone": "03492294946",
+      "city": "Pakpatan",
+      "note": "Dito",
+      "currency": "PKR",
+      "items": [
+        {
+          "collectionId": "walima",
+          "itemId": "sitara",
+          "name": "Sitara — Blush Pearl Gown",
+          "image": "/assets/img/dresses/walima-2-sm.webp",
+          "price": 168000,
+          "qty": 1
+        },
+        {
+          "collectionId": "party",
+          "itemId": "nocturne",
+          "name": "Nocturne — Onyx Beaded Gown",
+          "image": "/assets/img/dresses/party-2-sm.webp",
+          "price": 84000,
+          "qty": 1
+        }
+      ],
+      "status": "new",
+      "createdAt": "2026-10-26T08:25:15.962Z"
+    },
+    {
+      "id": "ZNZ-7EC1AD",
+      "name": "Tehreem Hafeez",
+      "phone": "03492294946",
+      "city": "Pakpatan",
+      "note": "Dito same",
+      "currency": "PKR",
+      "items": [
+        {
+          "collectionId": "party",
+          "itemId": "lumen",
+          "name": "Lumen — Champagne Sequin Gown",
+          "image": "/assets/img/dresses/party-1-sm.webp",
+          "price": 62000,
+          "qty": 1
+        }
+      ],
+      "status": "new",
+      "createdAt": "2026-10-26T08:24:05.129Z"
+    }
+  ],
   "subscribers": [],
   "looks": [],
   "owner": {
