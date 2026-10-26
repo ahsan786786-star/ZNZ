@@ -328,18 +328,7 @@
     "hero": {
       "autoplay": true,
       "intervalSec": 3,
-      "posters": [
-        {
-          "id": "py04931",
-          "url": "/assets/img/posters/poster-1.webp",
-          "alt": "Z&Z luxury bridal campaign — ivory and gold bridal lehenga"
-        },
-        {
-          "id": "pbyqfb2",
-          "url": "/assets/img/posters/poster-2.webp",
-          "alt": "Z&Z formal wear — maroon and gold embroidered couture"
-        }
-      ]
+      "posters": []
     },
     "hotSelling": {
       "enabled": true,
