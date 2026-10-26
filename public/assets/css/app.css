@@ -951,3 +951,70 @@ html[data-theme='dark'] .ad-copy .ad-cta { color: var(--gold-3); }
 @media (max-width:620px){.live-pill{left:10px;bottom:12px;padding:7px 11px;font-size:11px}}
 @media (prefers-reduced-motion: reduce){.live-pill .dot{animation:none}.live-pill.bump b{animation:none}}
 [data-theme="night"] .live-pill{background:rgba(28,26,20,.9);border-color:rgba(201,165,78,.45);color:var(--ink-2)}
+
+/* ==========================================================================
+   Round 14 — storefront background life (canvas sits *behind* the content)
+   ========================================================================== */
+#bgfx {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  /* never blocks a tap, never sits on a poster */
+}
+#app, .site-head, .site-foot, footer, .wrap, .sec, .page-banner { position: relative; z-index: 1; }
+#app { z-index: 1; }
+@media (prefers-reduced-motion: reduce) { #bgfx { display: none !important; } }
+
+/* ==========================================================================
+   Round 15 — “Download app” in the menu + install sheet
+   ========================================================================== */
+.drawer-foot .dl-app {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  margin: 4px 0 0; padding: 11px 13px; border-radius: 14px; cursor: pointer;
+  border: 1px solid rgba(201, 165, 78, 0.55);
+  background: linear-gradient(160deg, #fdf6e6, #f6e8cd 55%, #f0dfba);
+  font: inherit; text-align: left; color: #3a2c14;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.drawer-foot .dl-app:hover { transform: translateY(-2px); box-shadow: 0 14px 26px -18px rgba(96, 74, 32, .8); }
+.drawer-foot .dl-app .dl-ic {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: linear-gradient(140deg, #e8cf8a, #c9a54e 60%, #a5822f); color: #211a0c;
+}
+.drawer-foot .dl-app .dl-tx { display: block; line-height: 1.25; }
+.drawer-foot .dl-app .dl-tx b { display: block; font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; }
+.drawer-foot .dl-app .dl-tx small { display: block; font-size: 10.5px; color: #6b5836; letter-spacing: .04em; }
+html[data-theme='night'] .drawer-foot .dl-app { background: linear-gradient(160deg, #2a2418, #1d1913); color: #f1e3c6; border-color: rgba(201,165,78,.45); }
+html[data-theme='night'] .drawer-foot .dl-app .dl-tx small { color: #c8b48a; }
+
+.app-modal {
+  position: fixed; inset: 0; z-index: 200; display: none;
+  background: rgba(24, 18, 8, .48); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+  padding: 18px; overflow: auto;
+}
+.app-modal.show { display: grid; place-items: center; animation: appFade .22s ease both; }
+@keyframes appFade { from { opacity: 0 } to { opacity: 1 } }
+.app-modal-box {
+  position: relative; width: min(94vw, 430px); border-radius: 20px; padding: 22px 20px 18px;
+  background: linear-gradient(170deg, #fffdf7, #fbf3e2 70%, #f7ecd7);
+  border: 1px solid rgba(201, 165, 78, .5);
+  box-shadow: 0 34px 70px -34px rgba(60, 44, 14, .6);
+  animation: appRise .3s var(--ease) both;
+}
+@keyframes appRise { from { opacity: 0; transform: translateY(16px) scale(.98) } to { opacity: 1; transform: none } }
+.app-modal-box h3 { margin: 0 0 6px; font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 500; color: #2c2110; }
+.app-modal-x {
+  position: absolute; top: 10px; right: 12px; border: 0; background: transparent; cursor: pointer;
+  font-size: 15px; color: #7a6132; padding: 6px;
+}
+.app-lead { margin: 0 0 10px; font-size: 12.5px; line-height: 1.7; color: #6b5836; }
+.app-steps { margin: 6px 0 10px 18px; padding: 0; font-size: 12.5px; line-height: 1.85; color: #4a3a1c; }
+.app-steps li { margin-bottom: 4px; }
+.app-note { margin: 8px 0 0; font-size: 11px; color: #8a7448; line-height: 1.6; }
+html[data-theme='night'] .app-modal-box { background: linear-gradient(170deg, #221d15, #171410); border-color: rgba(201,165,78,.4); }
+html[data-theme='night'] .app-modal-box h3 { color: #f3e5c8; }
+html[data-theme='night'] .app-lead, html[data-theme='night'] .app-note { color: #c8b48a; }
+html[data-theme='night'] .app-steps { color: #e3d3ae; }

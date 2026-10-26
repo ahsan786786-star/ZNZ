@@ -10,7 +10,29 @@ A complete, ultra-fast bridal couture website with **three faces**:
 
 ---
 
-## What is new in this build (round 8)
+## What is new in this build (round 13 — final)
+
+1. **Every picture is stored at full quality.** Anything uploaded from the admin **or** owner panel
+   is saved up to **4K wide** (posters/backgrounds 3840 px, dresses 3200 px, collections 3000 px) at
+   WebP quality 92, and two lighter twins are generated automatically (`-md` 1600 px, `-sm` 640 px) so
+   phones still load fast. Pictures uploaded earlier get their missing sizes built at boot — you do
+   nothing.
+2. **No more broken picture icons.** A missing image now answers `404` instead of the HTML page, and
+   every `<img>` falls back to the full-size file if a lighter twin is unavailable. Uploaded posters
+   show up on the first load, on desktop and phone.
+3. **Login rules locked down.** Owner ID / password / PIN can only be changed from `/owner`
+   (*Owner security*). The admin login can be changed only by the owner (*Admin control*, proving
+   identity with the **owner** password); the admin can change its own login only when the owner
+   ticks *Own username / password / PIN change*. Any change signs the affected account out
+   immediately — the owner stays signed in when resetting the admin.
+   The old hard-coded master password was removed, so an old build's password can never open the panel.
+4. **Gentle animation on the collection boxes** — they fade/slide in one by one, a slow gold shimmer
+   crosses the picture on hover, the photo zooms softly and a slow gold border breathes. Transform and
+   opacity only, and it switches off automatically for visitors who prefer reduced motion.
+5. **This package ships with the documented logins** (`admin / znz2026 / 2026` and
+   `1234567890123 / admin123 / 998877`) — change them on day one.
+
+## What was new in round 8
 
 1. **Automatic background removal for every dress** — as soon as a dress or album photo is uploaded
    the server cuts the model / hanger / studio away and saves a transparent version next to it
@@ -78,7 +100,7 @@ The first run installs two small packages (needs Node.js LTS from <https://nodej
 | Field | Value |
 |---|---|
 | Username | `admin` |
-| Password | `ZnZ2026` (or `znz2026`) |
+| Password | `znz2026` |
 | PIN | `2026` |
 
 Please change both sets of details on the first day (owner: *Owner security* tab; admin: *Admin control* tab).
@@ -87,8 +109,13 @@ The three faces are **fully separate**: the customer needs no login at all, `/ad
 admin key, and `/owner` only accepts the owner key. Using owner details at `/admin` (or the other way
 round) is refused with a hint pointing to the right door.
 
-Only the **owner** can change the admin's username, password, PIN and permissions. The admin can only
-change its own details if the owner has granted *Security* access.
+Only the **owner** can change the admin's username, password, PIN and permissions
+(*Admin control* → your owner password confirms it). The admin can only change its own details if the
+owner has granted *Own username / password / PIN change*. The owner's own login can only be changed
+from *Owner security* — never from the admin panel.
+
+> Forgot the admin password? Open `/owner` → **Admin control** → set a new one with your owner
+> password. No terminal, no rebuild.
 
 ### Live visitors
 *Owner panel ▸ Live visitors* shows, in real time (refresh every 6 s), how many people are on the site

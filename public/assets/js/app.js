@@ -35,14 +35,20 @@
     ['bounce', 'Bounce'], ['accordion', 'Accordion'], ['parallax', 'Parallax'],
     ['morph', 'Morphing'], ['stack', 'Stacked cards'], ['rotate', 'Slow spin']
   ];
+  /* the owner picks the effect; the customer never sees a switcher */
+  function chosenTransition() {
+    const a = (S.data && S.data.animations) || {};
+    const name = a.cardTransition || 'zoom';
+    return TRANS.some(([v]) => v === name) ? name : 'zoom';
+  }
   function applyTransition(name) {
-    document.documentElement.setAttribute('data-transition', name || 'fade');
-    const grid = document.getElementById('collBody') || document.getElementById('view');
-    if (grid) {
-      grid.classList.remove('tr-anim');
-      void grid.offsetWidth;
-      grid.classList.add('tr-anim');
-    }
+    const tr = name || chosenTransition();
+    document.documentElement.setAttribute('data-transition', tr);
+    document.querySelectorAll('.tr-anim').forEach((el) => {
+      el.style.animation = 'none';
+      void el.offsetWidth;                       /* restart the keyframes */
+      el.style.animation = '';
+    });
   }
   const I = {
     cart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 8h12l-1.2 11.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8Z"/><path d="M9 8V6.6a3 3 0 0 1 6 0V8"/></svg>',
@@ -54,6 +60,7 @@
     arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path d="M5 12h13M12 5l7 7-7 7"/></svg>',
     pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>',
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 6.5 9.6 17 4 11.6"/></svg>',
+    download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M12 4v11m0 0 4-4m-4 4-4-4"/><path d="M4.5 19.5h15"/></svg>',
     key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" width="13" height="13"><circle cx="8" cy="8" r="4"/><path d="M11 11l9 9M16.5 16.5l2-2M14 14l1.6-1.6"/></svg>',
     wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1s-.8 1-1 1.2c-.2.2-.4.3-.7.1a8 8 0 0 1-2.4-1.5 9 9 0 0 1-1.6-2c-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 1.9 3 4.7 4.2 2.8 1.1 2.8.8 3.3.7.5 0 1.6-.6 1.8-1.3.2-.6.2-1.2.2-1.3-.1-.2-.3-.2-.6-.4ZM12 21.6a9.5 9.5 0 0 1-4.8-1.3L3 21.6l1.4-4A9.6 9.6 0 1 1 12 21.6Z"/></svg>',
     instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r="1" fill="currentColor" stroke="none"/></svg>',
@@ -160,7 +167,7 @@
     const anim = S.data.animations || {};
     document.documentElement.setAttribute('data-logo-anim', anim.logo === 'none' ? 'none' : (anim.logo === 'soft' ? 'soft' : anim.logo === 'float' ? 'float' : 'spin'));
     document.documentElement.style.setProperty('--logo-sec', (Number(anim.logoSeconds) || 9) + 's');
-    document.documentElement.setAttribute('data-transition', anim.transition || 'fade');
+    document.documentElement.setAttribute('data-transition', anim.cardTransition || 'zoom');
 
     document.documentElement.setAttribute('data-theme', S.theme === 'dark' ? 'dark' : 'light');
     const mt = document.querySelector('meta[name="theme-color"]');
@@ -223,7 +230,11 @@
       </ul>
       <div class="drawer-foot">
         ${(S.data.contact.phone ? `<div style="margin-bottom:6px">${esc(S.data.contact.phone)}</div>` : '')}
-        <div style="letter-spacing:.24em;text-transform:uppercase;font-size:9px">Couture · Made to measure</div>
+        <button class="dl-app" id="dlApp" type="button">
+          <span class="dl-ic">${I.download}</span>
+          <span class="dl-tx"><b>Download app</b><small>Install on your phone — one tap</small></span>
+        </button>
+        <div style="letter-spacing:.24em;text-transform:uppercase;font-size:9px;margin-top:12px">Couture · Made to measure</div>
       </div>`;
   }
 
@@ -276,6 +287,241 @@
       }, 250);
     });
     document.body.appendChild(el);
+  }
+
+  /* ------------------------------ install app -----------------------------
+     “Download app” in the menu installs the store on the phone home screen.
+     Android / desktop → native one-tap prompt.  iPhone → short clear steps.   */
+  let installEvent = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    installEvent = e;
+  });
+  window.addEventListener('appinstalled', () => {
+    installEvent = null;
+    try { toast('App installed — the Z&Z icon is on your home screen.'); } catch (err) {}
+  });
+
+  function isStandalone() {
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  }
+
+  function appModal(html) {
+    let m = document.getElementById('appModal');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'appModal';
+      m.className = 'app-modal';
+      m.innerHTML = '<div class="app-modal-box" role="dialog" aria-modal="true">'
+        + '<button class="app-modal-x" id="appModalX" aria-label="Close">✕</button>'
+        + '<div id="appModalBody"></div></div>';
+      document.body.appendChild(m);
+      m.addEventListener('click', (e) => {
+        if (e.target === m || e.target.closest('#appModalX')) m.classList.remove('show');
+        if (e.target.closest('#appDoInstall')) { m.classList.remove('show'); doInstall(); }
+      });
+    }
+    document.getElementById('appModalBody').innerHTML = html;
+    m.classList.add('show');
+  }
+
+  async function doInstall() {
+    if (!installEvent) { showInstallSteps(); return; }
+    installEvent.prompt();
+    const choice = await installEvent.userChoice.catch(() => ({ outcome: 'dismissed' }));
+    installEvent = null;
+    if (choice && choice.outcome === 'accepted') {
+      try { toast('Installing Z&Z on your phone…'); } catch (e) {}
+    }
+  }
+
+  function showInstallSteps() {
+    const ua = navigator.userAgent || '';
+    const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const android = /Android/.test(ua);
+    const steps = ios
+      ? ['Open this page in <b>Safari</b> (not Chrome).',
+         'Tap the <b>Share</b> button (square with an arrow, at the bottom).',
+         'Scroll down and tap <b>“Add to Home Screen”</b>.',
+         'Tap <b>Add</b> — the Z&Z icon appears on your home screen.']
+      : android
+        ? ['Open this page in <b>Chrome</b>.',
+           'Tap the <b>three dots</b> (top right).',
+           'Tap <b>“Install app”</b> or <b>“Add to Home screen”</b>.',
+           'Confirm — the Z&Z icon appears on your phone.']
+        : ['In <b>Chrome / Edge</b>, click the install icon (⊕) in the address bar.',
+           'Or open the browser menu → <b>“Install Z&Z…”</b>.',
+           'Confirm — the shop opens in its own window like an app.'];
+    appModal('<h3>Get the Z&Z app</h3>'
+      + '<p class="app-lead">The store installs straight from this page — no Play Store, no download, free, and always up to date.</p>'
+      + '<ol class="app-steps">' + steps.map((t) => '<li>' + t + '</li>').join('') + '</ol>'
+      + '<p class="app-note">Everything works in the app: dresses, the try-on studio, WhatsApp ordering and your saved bag.</p>');
+  }
+
+  function askInstallApp() {
+    if (isStandalone()) {
+      appModal('<h3>You already have the app</h3><p class="app-lead">This page is running as the Z&Z app — open it any time from the Z&Z icon on your home screen.</p>');
+      return;
+    }
+    if (installEvent) {
+      appModal('<h3>Get the Z&Z app</h3>'
+        + '<p class="app-lead">Install the boutique on your phone — full screen, faster loading, and your bag stays saved.</p>'
+        + '<button class="btn btn-gold btn-block" id="appDoInstall">Install now</button>'
+        + '<p class="app-note">Free · no Play Store account · browsing works even on a weak signal.</p>');
+      return;
+    }
+    showInstallSteps();
+  }
+
+  /* the service worker powers the install prompt and weak-signal browsing */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     Storefront background life — a few soft bubbles and/or tiny stars drifting
+     behind the posters, the collection boxes and the text. They are painted on
+     a fixed canvas *under* the page content, so a photo or a box always covers
+     them: nothing ever sits on top of a dress or a poster.
+     The owner decides: bubbles, stars, both, or off (Owner ▸ Layout & motion).
+     ------------------------------------------------------------------------ */
+  let bgFx = { raf: 0, parts: [], ctx: null, cv: null, w: 0, h: 0, dpr: 1, speed: 1, on: false };
+
+  function bgfxCfg() {
+    const c = (S.data && S.data.bgfx) || {};
+    return {
+      mode: c.mode || 'bubbles',
+      count: Math.max(0, Math.min(60, Number(c.count) || 16)),
+      speed: Math.max(0.2, Math.min(3, Number(c.speed) || 1)),
+      opacity: Math.max(0.15, Math.min(1, c.opacity == null ? 0.55 : Number(c.opacity)))
+    };
+  }
+
+  function mountBgFx() {
+    const cfg = bgfxCfg();
+    if (cfg.mode === 'off' || !cfg.count) { unmountBgFx(); return; }
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { unmountBgFx(); return; }
+    let cv = document.getElementById('bgfx');
+    if (!cv) {
+      cv = document.createElement('canvas');
+      cv.id = 'bgfx';
+      cv.setAttribute('aria-hidden', 'true');
+      document.body.insertBefore(cv, document.body.firstChild);
+    }
+    bgFx.cv = cv;
+    bgFx.ctx = cv.getContext('2d');
+    bgFx.speed = cfg.speed;
+    bgFx.on = true;
+    sizeBgFx();
+    seedBgFx(cfg);
+    if (!bgFx.raf) bgFx.raf = requestAnimationFrame(stepBgFx);
+    window.removeEventListener('resize', sizeBgFx);
+    window.addEventListener('resize', sizeBgFx, { passive: true });
+  }
+
+  function unmountBgFx() {
+    const cv = document.getElementById('bgfx');
+    if (cv) cv.remove();
+    cancelAnimationFrame(bgFx.raf);
+    bgFx.raf = 0; bgFx.on = false; bgFx.parts = [];
+  }
+
+  function sizeBgFx() {
+    const cv = bgFx.cv;
+    if (!cv) return;
+    bgFx.dpr = Math.min(2, window.devicePixelRatio || 1);
+    bgFx.w = window.innerWidth;
+    bgFx.h = window.innerHeight;
+    cv.width = Math.round(bgFx.w * bgFx.dpr);
+    cv.height = Math.round(bgFx.h * bgFx.dpr);
+    cv.style.width = bgFx.w + 'px';
+    cv.style.height = bgFx.h + 'px';
+    if (bgFx.ctx) bgFx.ctx.setTransform(bgFx.dpr, 0, 0, bgFx.dpr, 0, 0);
+  }
+
+  function seedBgFx(cfg) {
+    const mix = cfg.mode === 'both';
+    const kind = cfg.mode === 'stars' ? 'star' : cfg.mode === 'bubbles' ? 'bubble' : null;
+    bgFx.parts = [];
+    for (let i = 0; i < cfg.count; i += 1) {
+      const type = kind || (mix ? (i % 2 ? 'star' : 'bubble') : 'bubble');
+      bgFx.parts.push({
+        type,
+        x: Math.random() * bgFx.w,
+        y: Math.random() * bgFx.h,
+        r: type === 'bubble' ? 4 + Math.random() * 12 : 1 + Math.random() * 1.9,
+        vy: type === 'bubble' ? -(0.10 + Math.random() * 0.22) : -(0.04 + Math.random() * 0.10),
+        drift: (Math.random() - 0.5) * 0.16,
+        phase: Math.random() * Math.PI * 2,
+        twinkle: 0.4 + Math.random() * 1.6,
+        alpha: cfg.opacity * (type === 'bubble' ? 0.55 + Math.random() * 0.45 : 0.5 + Math.random() * 0.5)
+      });
+    }
+  }
+
+  function drawBubble(c, p, t) {
+    const wobble = Math.sin(t * 0.0009 + p.phase) * 6;
+    const x = p.x + wobble;
+    const y = p.y;
+    const r = p.r;
+    const g = c.createRadialGradient(x - r * 0.34, y - r * 0.38, r * 0.12, x, y, r);
+    g.addColorStop(0, 'rgba(255,255,255,' + (p.alpha * 0.95) + ')');
+    g.addColorStop(0.55, 'rgba(246,232,196,' + (p.alpha * 0.42) + ')');
+    g.addColorStop(1, 'rgba(201,165,78,' + (p.alpha * 0.22) + ')');
+    c.beginPath();
+    c.arc(x, y, r, 0, Math.PI * 2);
+    c.fillStyle = g;
+    c.fill();
+    c.lineWidth = 0.8;
+    c.strokeStyle = 'rgba(196,158,72,' + (p.alpha * 0.55) + ')';
+    c.stroke();
+    c.beginPath();
+    c.arc(x - r * 0.33, y - r * 0.36, r * 0.20, 0, Math.PI * 2);
+    c.fillStyle = 'rgba(255,255,255,' + (p.alpha * 0.85) + ')';
+    c.fill();
+  }
+
+  function drawStar(c, p, t) {
+    const k = 0.55 + 0.45 * Math.sin(t * 0.0022 * p.twinkle + p.phase);
+    const a = p.alpha * k;
+    const x = p.x + Math.sin(t * 0.0006 + p.phase) * 5;
+    const y = p.y;
+    c.save();
+    c.translate(x, y);
+    c.fillStyle = 'rgba(214,176,92,' + a + ')';
+    /* four-point sparkle */
+    const r = p.r * 2.2;
+    c.beginPath();
+    c.moveTo(0, -r);
+    c.quadraticCurveTo(p.r * 0.35, -p.r * 0.35, r, 0);
+    c.quadraticCurveTo(p.r * 0.35, p.r * 0.35, 0, r);
+    c.quadraticCurveTo(-p.r * 0.35, p.r * 0.35, -r, 0);
+    c.quadraticCurveTo(-p.r * 0.35, -p.r * 0.35, 0, -r);
+    c.fill();
+    c.beginPath();
+    c.arc(0, 0, p.r * 0.9, 0, Math.PI * 2);
+    c.fillStyle = 'rgba(255,248,228,' + Math.min(1, a * 1.15) + ')';
+    c.fill();
+    c.restore();
+  }
+
+  function stepBgFx(t) {
+    bgFx.raf = requestAnimationFrame(stepBgFx);
+    const c = bgFx.ctx;
+    if (!c || !bgFx.on) return;
+    if (document.hidden) return;                       /* save battery in a hidden tab */
+    c.clearRect(0, 0, bgFx.w, bgFx.h);
+    const sp = bgFx.speed;
+    for (const p of bgFx.parts) {
+      p.y += p.vy * sp;
+      p.x += p.drift * sp;
+      if (p.y < -40) { p.y = bgFx.h + 24; p.x = Math.random() * bgFx.w; }
+      if (p.x < -30) p.x = bgFx.w + 20;
+      if (p.x > bgFx.w + 30) p.x = -20;
+      if (p.type === 'bubble') drawBubble(c, p, t); else drawStar(c, p, t);
+    }
   }
 
   function paintLive(n) {
@@ -386,13 +632,6 @@
               <h2 class="sec-title">${esc(hs.title || 'Most Loved This Season')}</h2>
               <div class="hr-orn"><span></span></div>
             </div>
-            <div class="view-toggle" id="lovedToggle" style="margin:0 0 14px">
-              <button data-v="wheel" class="${((S.data.layout && S.data.layout.homeLoved) || hs.layout) === 'wheel' ? 'on' : ''}">Circular</button>
-              <button data-v="grid" class="${((S.data.layout && S.data.layout.homeLoved) || hs.layout) === 'grid' ? 'on' : ''}">Grid</button>
-              <select class="trans-pick" id="lovedTrans" aria-label="Transition">
-                ${TRANS.map(([v, l]) => `<option value="${v}" ${((S.data.animations || {}).cardTransition || 'zoom') === v ? 'selected' : ''}>${l}</option>`).join('')}
-              </select>
-            </div>
             <div id="lovedBody">
               ${((S.data.layout && S.data.layout.homeLoved) || hs.layout) === 'wheel' ? wheelMarkup(items, 'loved') : itemGrid(items)}
             </div>
@@ -401,23 +640,9 @@
       }
     }
 
-    /* home switcher: circular / grid + any of the 13 transitions */
-    setTimeout(() => {
-      const tg = document.getElementById('lovedToggle');
-      const ts = document.getElementById('lovedTrans');
-      if (ts) ts.addEventListener('change', () => applyTransition(ts.value));
-      if (!tg) return;
-      tg.addEventListener('click', (e) => {
-        const b = e.target.closest('button[data-v]');
-        if (!b) return;
-        tg.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
-        const body = document.getElementById('lovedBody');
-        body.innerHTML = b.dataset.v === 'wheel' ? wheelMarkup(items, 'loved') : itemGrid(items);
-        if (b.dataset.v === 'wheel') initWheel(document.querySelector('[data-wheel="loved"]'));
-        bindLinks();
-        applyTransition((S.data.animations || {}).cardTransition || 'fade');
-      });
-    }, 0);
+
+    /* the owner's chosen card effect plays once on the home grids */
+    setTimeout(() => applyTransition(chosenTransition()), 30);
 
     /* owner's advert — top strip */
     out.push(adsSlot('top'));
@@ -553,22 +778,16 @@
     return out.join('');
   }
 
+  /* kept for older templates: the class name of the owner's card effect */
   function tcls() {
-    const a = (S.data && S.data.animations) || {};
-    const map = {
-      fade: 't-fade', slide: 't-slide', zoom: 't-zoom', flip: 't-flip', cube: 't-cube',
-      bounce: 't-bounce', accordion: 't-accordion', coverflow: 't-coverflow', curl: 't-curl',
-      parallax: 't-parallax', morph: 't-morph', stack: 't-stack'
-    };
-    return map[a.cardTransition] || 't-zoom';
+    return 't-' + chosenTransition();
   }
 
   function itemGrid(items) {
     if (!items.length) return '<div class="empty">No pieces here yet.</div>';
-    const t = tcls();
-    return `<div class="item-grid stagger ${t}">
-      ${items.map((it) => `
-        <a class="item-card" href="/d/${esc(it.collectionId)}/${esc(it.id)}" data-link>
+    return `<div class="item-grid stagger">
+      ${items.map((it, i) => `
+        <a class="item-card tr-anim" style="animation-delay:${Math.min(i, 11) * 0.055}s" href="/d/${esc(it.collectionId)}/${esc(it.id)}" data-link>
           <div class="ph">
             ${imgTag((it.thumbs && it.thumbs[0]) || it.images[0], it.name, '', false)}
             ${it.views > 6 ? '<span class="badge">Most loved</span>' : ''}
@@ -853,13 +1072,6 @@
       <div class="wrap">
         <div class="crumbs" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
           <span><a href="/" data-link>Home</a> &nbsp;/&nbsp; ${esc(col.name)}</span>
-          <div class="view-toggle" id="viewToggle">
-            <button data-v="wheel" class="${layout === 'wheel' ? 'on' : ''}">Circular</button>
-            <button data-v="grid" class="${layout === 'grid' ? 'on' : ''}">Grid</button>
-            <select class="trans-pick" id="transPick" aria-label="Transition">
-              ${TRANS.map(([v, l]) => `<option value="${v}" ${(anim.cardTransition || 'zoom') === v ? 'selected' : ''}>${l}</option>`).join('')}
-            </select>
-          </div>
         </div>
         <section class="sec" style="padding-top:18px" id="collBody">
           ${items.length ? (layout === 'wheel' ? wheelMarkup(items.map((it) => ({ ...it, collectionId: col.id })), 'coll') : itemGrid(items.map((it) => ({ ...it, collectionId: col.id })))) : '<div class="empty">New pieces are being added to this collection. Please check back soon.</div>'}
@@ -867,22 +1079,7 @@
       </div>`;
     initWheel($('[data-wheel="coll"]'));
     bindLinks();
-    const tsel = $('#transPick');
-    if (tsel) tsel.addEventListener('change', () => { applyTransition(tsel.value); });
-    const toggle = $('#viewToggle');
-    if (toggle) {
-      toggle.addEventListener('click', (e) => {
-        const b = e.target.closest('button[data-v]');
-        if (!b) return;
-        $$('button', toggle).forEach((x) => x.classList.toggle('on', x === b));
-        const body = $('#collBody');
-        const list = col.items.map((it) => ({ ...it, collectionId: col.id }));
-        body.innerHTML = b.dataset.v === 'wheel' ? wheelMarkup(list, 'coll') : itemGrid(list);
-        if (b.dataset.v === 'wheel') initWheel($('[data-wheel="coll"]'));
-        bindLinks();
-        applyTransition((S.data.animations || {}).cardTransition || 'fade');
-      });
-    }
+    applyTransition(chosenTransition());
   }
 
   /* -------------------------------- product ------------------------------- */
@@ -1334,7 +1531,6 @@
         <div class="foot-bottom">
           <span>© ${new Date().getFullYear()} ${esc(b.name || 'Z&Z')} · All rights reserved</span>
           <span>Crafted with love in Pakistan</span>
-          <a class="admin-key" href="/admin" aria-label="Admin">${I.key} Admin</a>
         </div>
       </div>`;
   }
@@ -1403,6 +1599,7 @@
       }
     });
     $('#drawer').addEventListener('click', (e) => {
+      if (e.target.closest('#dlApp')) { e.preventDefault(); askInstallApp(); return; }
       if (e.target.closest('#drawerClose')) openDrawer(false);
       const act = e.target.closest('[data-act]');
       if (act) {
@@ -1434,6 +1631,7 @@
   function paint(res) {
     S.data = res.data;
     try { mountLivePill(); } catch (e) {}
+    try { mountBgFx(); } catch (e) {}
     if (!curList().some((c) => c.code === S.currency)) S.currency = (curList()[0] || {}).code || 'PKR';
     applyTheme(); renderHeader(); renderDrawer(); renderFooter(); route();
   }
@@ -1452,6 +1650,7 @@
     writeBootCache(res.data);
     S.data = res.data;
     try { mountLivePill(); } catch (e) {}
+    try { mountBgFx(); } catch (e) {}
     if (!curList().some((c) => c.code === S.currency)) S.currency = (curList()[0] || {}).code || 'PKR';
     /* live exchange rates (auto-adjusts with the real market) */
     fetch('/api/rates').then((r) => r.json()).then((j) => {

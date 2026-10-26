@@ -84,6 +84,44 @@ function precompress() {
   roots.forEach(walk);
 }
 
+/* Pictures uploaded before this build only have the big file. Build the missing
+   -md / -sm twins in the background at boot, so every photo has a fast phone
+   version without the owner doing anything. */
+function backfillUploadVariants() {
+  setTimeout(async () => {
+    const files = [];
+    const walk = (dir) => {
+      let list = [];
+      try { list = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return; }
+      for (const d of list) {
+        const full = path.join(dir, d.name);
+        if (d.isDirectory()) { walk(full); continue; }
+        if (/\.webp$/i.test(d.name) && !/-(md|sm|cut|photo)\.webp$/i.test(d.name)) files.push(full);
+      }
+    };
+    walk(UPLOADS);
+    let made = 0;
+    for (const full of files) {
+      const base = full.replace(/\.webp$/i, '');
+      try {
+        if (!fs.existsSync(base + '-md.webp')) {
+          const buf = await sharp(full, { failOn: 'none' }).resize({ width: MD_W, withoutEnlargement: true })
+            .webp({ quality: 88, effort: 4 }).toBuffer();
+          fs.writeFileSync(base + '-md.webp', buf);
+          made++;
+        }
+        if (!fs.existsSync(base + '-sm.webp')) {
+          const buf = await sharp(full, { failOn: 'none' }).resize({ width: SM_W, withoutEnlargement: true })
+            .webp({ quality: 80, effort: 4 }).toBuffer();
+          fs.writeFileSync(base + '-sm.webp', buf);
+          made++;
+        }
+      } catch (e) { /* skip this file */ }
+    }
+    if (made) console.log('[images] extra sizes built:', made);
+  }, 2500);
+}
+
 app.use((req, res, next) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') return next();
   if (!/\bgzip\b/.test(req.headers['accept-encoding'] || '')) return next();
@@ -244,6 +282,7 @@ function publicPayload() {
     layout: s.layout || {},
     animations: s.animations || {},
     bubbles: s.bubbles || {},
+    bgfx: s.bgfx || {},
     look: Object.assign({}, s.look || {}, { backgrounds: backgrounds() }),
     ads: activeAds(s.ads),
     permissions: { adminSeesCustomerPhotos: !!(s.permissions || {}).adminSeesCustomerPhotos },
@@ -418,7 +457,14 @@ const upload = multer({
   }
 });
 
-const KIND_MAX = { poster: 2400, collection: 1600, dress: 2000, terms: 1400, about: 1600, logo: 900, other: 1800 };
+/* Every upload is stored at print/TV quality (up to 4K wide) and WebP-encoded so
+   it still downloads fast. Smaller twins (-md 1600px, -sm 640px) keep phones quick. */
+const KIND_MAX = {
+  poster: 3840, background: 3840, look: 3840, hero: 3840,
+  dress: 3200, collection: 3000, about: 2600, other: 3000,
+  terms: 2400, logo: 1600
+};
+const MD_W = 1600, SM_W = 640;
 
 
 /* ------------------- automatic dress cut-out (background gone) -------------
@@ -785,19 +831,41 @@ async function ensureCutout(url) {
 async function processImage(buffer, kind) {
   const max = KIND_MAX[kind] || KIND_MAX.other;
   const id = Date.now().toString(36) + crypto.randomBytes(4).toString('hex');
-  const big = await sharp(buffer, { failOn: 'none' })
+  /* any common picture works — jpg, jpeg, png, webp, avif, gif, tif, heic (if the
+     server has it), even a screenshot or a phone photo with rotation data.          */
+  let src = buffer;
+  try {
+    const meta = await sharp(buffer, { failOn: 'none' }).metadata();
+    if (!meta || !meta.width) throw new Error('no pixels');
+  } catch (e) {
+    throw new Error('That file is not a picture we can read. Please use JPG, PNG or WebP.');
+  }
+  const big = await sharp(src, { failOn: 'none' })
     .rotate()
     .resize({ width: max, height: Math.round(max * 1.6), fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 86, effort: 4 })
+    /* gentle clean-up: a touch of sharpness + a little colour life, no visible artefacts */
+    .sharpen({ sigma: 0.8, m1: 0.6, m2: 0.9, x1: 2.2, y2: 12, y3: 14 })
+    .modulate({ saturation: 1.04, brightness: 1.01 })
+    .webp({ quality: 92, effort: 5, smartSubsample: true })
     .toBuffer();
-  const thumb = await sharp(buffer, { failOn: 'none' })
-    .rotate()
-    .resize({ width: 640, withoutEnlargement: true })
-    .webp({ quality: 78, effort: 4 })
+  const mid = await sharp(big, { failOn: 'none' })
+    .resize({ width: MD_W, withoutEnlargement: true })
+    .webp({ quality: 88, effort: 4 })
+    .toBuffer();
+  const thumb = await sharp(big, { failOn: 'none' })
+    .resize({ width: SM_W, withoutEnlargement: true })
+    .webp({ quality: 80, effort: 4 })
     .toBuffer();
   fs.writeFileSync(path.join(UPLOADS, id + '.webp'), big);
+  fs.writeFileSync(path.join(UPLOADS, id + '-md.webp'), mid);
   fs.writeFileSync(path.join(UPLOADS, id + '-sm.webp'), thumb);
-  const rec = { url: `${UPLOAD_URL}/${id}.webp`, thumb: `${UPLOAD_URL}/${id}-sm.webp` };
+  const meta = await sharp(big).metadata().catch(() => ({}));
+  const rec = {
+    url: `${UPLOAD_URL}/${id}.webp`,
+    md: `${UPLOAD_URL}/${id}-md.webp`,
+    thumb: `${UPLOAD_URL}/${id}-sm.webp`,
+    w: meta.width || 0, h: meta.height || 0
+  };
   /* dress photos also get a background-free twin for the Try-On Studio */
   if (kind === 'dress' || kind === 'item' || kind === 'other') {
     try {
@@ -949,7 +1017,7 @@ const PERM_FOR_PATH = [
 const PERM_FOR_SETTING = {
   hero: 'adminCanPosters', notice: 'adminCanHome', hotSelling: 'adminCanHome',
   valuable: 'adminCanHome', order: 'adminCanHome', layout: 'adminCanHome',
-  animations: 'adminCanHome', bubbles: 'adminCanHome', brand: 'adminCanHome',
+  animations: 'adminCanHome', bubbles: 'adminCanHome', bgfx: 'adminCanHome', brand: 'adminCanHome',
   about: 'adminCanPages', terms: 'adminCanPages', seo: 'adminCanPages',
   contact: 'adminCanContact', social: 'adminCanContact', currency: 'adminCanContact',
   ads: 'adminCanAds',
@@ -1000,9 +1068,9 @@ app.post('/api/admin/login', (req, res) => {
   for (const c of candidates) {
     const a = c.rec || {};
     const okUser = username && String(username).trim() === a.username;
-    let okPass = auth.verify(password || '', a.passSalt, a.passHash);
-    // friendly: admin password is accepted in any case (ZnZ2026 / znz2026)
-    if (!okPass && c.role === 'admin' && String(password || '').toLowerCase() === 'znz2026') okPass = true;
+    /* exact match only — a hard-coded "master password" would let anyone in even
+       after the owner changed the admin password. */
+    const okPass = auth.verify(password || '', a.passSalt, a.passHash);
     const okPin = auth.verify(pin || '', a.pinSalt, a.pinHash);
     if (okUser && okPass && okPin) { match = c; break; }
   }
@@ -1047,33 +1115,54 @@ app.post('/api/admin/credentials', auth.requireAuth, (req, res) => {
   const { currentPassword, username, password, pin, target } = req.body || {};
   const sess = auth.getSession(auth.cookieToken(req));
   const db = store.get();
-  const which = target === 'admin' || target === 'owner' ? target : (sess.role === 'owner' ? 'owner' : 'admin');
-  if (which === 'admin' && sess.role !== 'owner' && sess.username !== (db.admin || {}).username)
-    return res.status(403).json({ ok: false, error: 'Not allowed.' });
-  if (which === 'owner' && sess.role !== 'owner')
+  const isOwner = sess.role === 'owner';
+  const which = target === 'admin' || target === 'owner' ? target : (isOwner ? 'owner' : 'admin');
+
+  /* --- who is allowed to touch which login ---------------------------------
+     owner login  : only the owner (never the admin panel)
+     admin login  : the owner any time, or the admin itself when the owner has
+                    granted “Own username / password / PIN change”.            */
+  if (which === 'owner' && !isOwner)
     return res.status(403).json({ ok: false, error: 'Only the owner can change owner credentials.' });
-  const a = (which === 'owner' ? db.owner : db.admin) || {};
-  if (!auth.verify(currentPassword || '', a.passSalt, a.passHash))
+  if (which === 'admin' && !isOwner && sess.username !== (db.admin || {}).username)
+    return res.status(403).json({ ok: false, error: 'Not allowed.' });
+
+  /* --- the password that proves who is asking -----------------------------
+     the owner proves identity with the OWNER password (also when resetting the
+     admin login); the admin proves it with the ADMIN password.               */
+  const proof = (which === 'admin' && isOwner) || which === 'owner'
+    ? (db.owner || {})
+    : (db.admin || {});
+  if (!auth.verify(currentPassword || '', proof.passSalt, proof.passHash))
     return res.status(403).json({ ok: false, error: 'Current password is incorrect.' });
   if (pin != null && String(pin).length && !/^\d{4}$/.test(String(pin)))
     return res.status(400).json({ ok: false, error: 'PIN must be exactly 4 digits.' });
   if (password != null && String(password).length && String(password).length < 6)
     return res.status(400).json({ ok: false, error: 'New password must be at least 6 characters.' });
-  if (username != null && String(username).trim().length < 3)
+  if (username != null && String(username).trim().length && String(username).trim().length < 3)
     return res.status(400).json({ ok: false, error: 'Username must be at least 3 characters.' });
 
   store.update((d) => {
-    const ad = which === 'owner' ? (d.owner = d.owner || {}) : d.admin;
-    if (username && which === 'admin' && sess.role !== 'owner' ) { /* admin may rename itself */ }
-    if (username) ad.username = String(username).trim().slice(0, 60);
+    const ad = which === 'owner' ? (d.owner = d.owner || {}) : (d.admin = d.admin || {});
+    if (username && String(username).trim()) ad.username = String(username).trim().slice(0, 60);
     if (password) { const h = auth.make(password); ad.passSalt = h.salt; ad.passHash = h.hash; }
     if (pin) { const h = auth.make(String(pin)); ad.pinSalt = h.salt; ad.pinHash = h.hash; }
     ad.updatedAt = new Date().toISOString();
   });
-  // force re-login with the new credentials
-  auth.destroySession(auth.cookieToken(req));
-  res.setHeader('Set-Cookie', 'zz_sid=; HttpOnly; Path=/; SameSite=Strict; Max-Age=0');
-  res.json({ ok: true, message: 'Credentials updated. Please log in again.' });
+
+  if (which === 'owner') {
+    /* own login changed → sign out everywhere, ask to log in again */
+    auth.destroyRoleSessions('owner');
+    res.setHeader('Set-Cookie', 'zz_sid=; HttpOnly; Path=/; SameSite=Strict; Max-Age=0');
+    return res.json({ ok: true, message: 'Owner login updated. Please sign in again.' });
+  }
+  /* admin login changed: kill every admin session, keep the owner signed in */
+  const killed = auth.destroyRoleSessions('admin');
+  if (!isOwner) {
+    res.setHeader('Set-Cookie', 'zz_sid=; HttpOnly; Path=/; SameSite=Strict; Max-Age=0');
+    return res.json({ ok: true, message: 'Admin login updated. Please sign in again.' });
+  }
+  return res.json({ ok: true, message: 'Admin login updated. Admin must sign in again.', signedOut: killed });
 });
 
 /* ----------------------------- admin data ------------------------------- */
@@ -1481,12 +1570,15 @@ app.post('/api/owner/backgrounds', bgUpload.single('image'), async (req, res) =>
     const dir = path.join(UPLOADS, 'backgrounds');
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     const big = await sharp(req.file.buffer, { failOn: 'none' }).rotate()
-      .resize({ width: 2000, height: 2667, fit: 'cover' }).webp({ quality: 84, effort: 4 }).toBuffer();
-    const small = await sharp(req.file.buffer, { failOn: 'none' }).rotate()
-      .resize({ width: 420, height: 560, fit: 'cover' }).webp({ quality: 74, effort: 4 }).toBuffer();
+      .resize({ width: 2560, height: 3413, fit: 'cover' }).webp({ quality: 92, effort: 5, smartSubsample: true }).toBuffer();
+    const mid = await sharp(big, { failOn: 'none' })
+      .resize({ width: 1280, height: 1707, fit: 'cover' }).webp({ quality: 86, effort: 4 }).toBuffer();
+    const small = await sharp(big, { failOn: 'none' })
+      .resize({ width: 420, height: 560, fit: 'cover' }).webp({ quality: 78, effort: 4 }).toBuffer();
     fs.writeFileSync(path.join(dir, id + '.webp'), big);
+    fs.writeFileSync(path.join(dir, id + '-md.webp'), mid);
     fs.writeFileSync(path.join(dir, id + '-sm.webp'), small);
-    const rec = { id, name: clean((req.body || {}).name, 60) || 'My background', url: `/uploads/backgrounds/${id}.webp`, small: `/uploads/backgrounds/${id}-sm.webp` };
+    const rec = { id, name: clean((req.body || {}).name, 60) || 'My background', url: `/uploads/backgrounds/${id}.webp`, md: `/uploads/backgrounds/${id}-md.webp`, small: `/uploads/backgrounds/${id}-sm.webp` };
     store.update((db) => {
       const look = (db.settings.look = db.settings.look || {});
       look.backgrounds = (look.backgrounds && look.backgrounds.length ? look.backgrounds : DEFAULT_BACKGROUNDS.slice()).concat([rec]);
@@ -1745,16 +1837,55 @@ app.get('/sitemap.xml', (req, res) => {
 /* manifest is generated from settings (name / icons follow admin branding) */
 app.get('/manifest.webmanifest', (req, res) => {
   const s = store.get().settings || {};
+  const name = (s.brand && s.brand.name) || 'Z&Z';
   res.type('application/manifest+json').json({
-    name: `${(s.brand && s.brand.name) || 'Z&Z'} — ${(s.brand && s.brand.tagline) || 'Luxury Bridals & Formals'}`,
-    short_name: (s.brand && s.brand.name) || 'Z&Z',
-    start_url: '/', display: 'standalone', background_color: (s.theme && s.theme.bgLight) || '#f7f2e8',
+    id: '/?source=app',
+    name: `${name} — ${(s.brand && s.brand.tagline) || 'Luxury Bridals & Formals'}`,
+    short_name: name,
+    description: 'Luxury bridal and formal couture — made to measure, delivered across Pakistan.',
+    start_url: '/?source=app',
+    scope: '/',
+    display: 'standalone',
+    display_override: ['standalone', 'minimal-ui', 'browser'],
+    orientation: 'portrait',
+    lang: 'en',
+    dir: 'ltr',
+    background_color: (s.theme && s.theme.bgLight) || '#f7f2e8',
     theme_color: (s.theme && s.theme.gold) || '#c9a54e',
+    categories: ['shopping', 'lifestyle'],
+    prefer_related_applications: false,
     icons: [
-      { src: '/assets/img/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { src: '/assets/img/icon-512.png', sizes: '512x512', type: 'image/png' }
+      { src: '/assets/img/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/assets/img/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: '/assets/img/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+    ],
+    shortcuts: [
+      { name: 'Collections', url: '/#collections' },
+      { name: 'Try-On Studio', url: '/look' }
     ]
   });
+});
+
+/* service worker — powers “Add to home screen” and weak-signal browsing */
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.type('application/javascript');
+  try {
+    res.send(fs.readFileSync(path.join(PUBLIC, 'sw.js')));
+  } catch (e) {
+    res.status(404).type('text/plain').send('no service worker');
+  }
+});
+
+/* Missing media must 404, never fall through to the SPA HTML shell —
+   an <img> that receives HTML shows a broken picture icon. */
+const MEDIA_EXT = /\.(webp|png|jpe?g|gif|svg|avif|mp4|webm|ico|woff2?|ttf|otf|css|js|json|xml|txt)$/i;
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  if (!MEDIA_EXT.test(req.path)) return next();
+  if (req.path.startsWith('/api/')) return next();
+  res.status(404).type('text/plain').send('Not found');
 });
 
 /* SPA fallback (client routes) */
@@ -1910,6 +2041,22 @@ function ensureDefaults() {
     }
   });
 
+  /* background life on the storefront (behind posters, cards and text) */
+  const BGFX_DEFAULTS = {
+    mode: 'bubbles',   // bubbles | stars | both | off
+    count: 16,         // how many float across the page (keep it calm)
+    speed: 1,          // 0.5 = very slow … 2 = lively
+    opacity: 0.55,     // how visible they are
+    behind: true       // always behind the boxes (kept for older data)
+  };
+  if (!S.bgfx) { S.bgfx = Object.assign({}, BGFX_DEFAULTS); changed = true; }
+  Object.keys(BGFX_DEFAULTS).forEach((k) => {
+    if (S.bgfx[k] === undefined || S.bgfx[k] === null || S.bgfx[k] === '') {
+      S.bgfx[k] = BGFX_DEFAULTS[k];
+      changed = true;
+    }
+  });
+
   /* owner-run advertising slots */
   if (!S.ads) {
     S.ads = { enabled: true, items: [] };
@@ -1959,9 +2106,9 @@ process.on('SIGTERM', async () => { store.flush(); try { await ghsync.flush(); }
   /* ---------------------------------------------------------------- build info */
 const BUILD = {
   name: 'Z&Z — Luxury Bridals & Formals',
-  version: '8.0.0',
-  build: '2026-10-25-r8',
-  features: ['try-on-studio', 'auto-cutout', '13-transitions', 'github-storage', 'backup-restore', 'browsing-badge', 'keep-awake']
+  version: '8.2.0',
+  build: '2026-10-26-r15',
+  features: ['try-on-studio', 'auto-cutout', '13-transitions', 'github-storage', 'backup-restore', 'browsing-badge', 'keep-awake', 'bg-bubbles', '4k-images', 'install-app', 'hidden-logins']
 };
 
 app.get('/api/version', (req, res) => {
@@ -2001,5 +2148,6 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`Z&Z running on http://0.0.0.0:${PORT}`);
     if (ghsync.enabled) console.log('GitHub storage: on — settings and uploads are saved to your repo');
     startKeepAwake();
+    backfillUploadVariants();
   });
 })();

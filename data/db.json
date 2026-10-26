@@ -1,11 +1,11 @@
 {
   "admin": {
     "username": "admin",
-    "passSalt": "fbb198ead14437db75c22c3b77779b44",
-    "passHash": "5c663eea419410ebd2dba97c2a6b34c1270a1cb7e6c9fc44324922197c3e860fc76a1c7fd779f741a49a6b7c673593eb3660cea106b60e96e310647ad62afd76",
-    "pinSalt": "f208bf6e94543e71bd9ebe0b534a64cc",
-    "pinHash": "44d291e735159de5904824e2aee50c437b83e068041281e753cc649f248ae790ddb7855d4c48c3669d41c358c62b091cbf48bebd447c722b34d2f246f0824fd4",
-    "updatedAt": "2026-10-24T21:31:52.210Z"
+    "passSalt": "13ec4d792418059358a6270cb2672f57",
+    "passHash": "88257c3e332a28f36d6c6c9ccb2a6f5aabd882471552282ece3e6526a032c66fb12e434d09ce29bf491a6c4787138ffd16a5642406046d32f2b786e3b3e9d11d",
+    "pinSalt": "7791ac348f0cf154fc2d81e5752a2296",
+    "pinHash": "693b55047b8042750cf99bd0025ba23dff4e43de8dc7e07571533436064f2894cc23bc8af7174933b7ba962150eabb68951c74652da1fe9e9ca81cee4c808ca8",
+    "updatedAt": "2026-10-26T11:53:54.616Z"
   },
   "settings": {
     "brand": {
@@ -26,7 +26,7 @@
     },
     "notice": {
       "enabled": true,
-      "text": "New Eid Edit is live — free delivery",
+      "text": "New Eid Edit is live — free delivery on all orders above PKR 50,000. Limited pieces only!",
       "link": ""
     },
     "social": {
@@ -463,6 +463,13 @@
       "show": true,
       "floor": 7,
       "label": "browsing now"
+    },
+    "bgfx": {
+      "mode": "bubbles",
+      "count": 16,
+      "speed": 1,
+      "opacity": 0.55,
+      "behind": true
     }
   },
   "collections": [
@@ -840,11 +847,11 @@
   "looks": [],
   "owner": {
     "username": "1234567890123",
-    "passSalt": "b94d9e3ecc2bd12054f0b812a83c273a",
-    "passHash": "6bcce35bd2fe614cbcba1466d651dd982d03a2572bf20d442352aeb5b4960f0c2f786b362000833a817a22b257e1f06a0e8091fc00693012856203047c4cbbaf",
-    "pinSalt": "a968767da2cd881843c57d3b6b45ce27",
-    "pinHash": "9dcf769edddea811c6c2c074040810a20dcdd5f487d6584351b03d5a5646b0091262a775fb6819c90bc384e7d19f261735b342c89ad36affe03001993b655fd8",
-    "updatedAt": "2026-10-25T06:56:20.805Z"
+    "passSalt": "b4e556f24829455f1724a2255720d9f1",
+    "passHash": "c364f49bfdff3ffc08b29e795f46bfa05539b68b9545387c8a32336e74f6545c81c64fafd690a0d283131e516f583b90c00be3b281e0d1fe9f3b0ed7b71858ba",
+    "pinSalt": "8d03c4a15e9f66fd96c243a24ebc9a7d",
+    "pinHash": "d0faac3096016ff498b4c73ebe463c3a2c08b7d7396f75e87fd97a29d1ddd4690835769adc93ea8be2676d756f462422bf5c41dd129d7700a679d6d9c918626a",
+    "updatedAt": "2026-10-26T11:53:54.707Z"
   },
   "tryons": []
 }

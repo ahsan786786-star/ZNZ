@@ -1,0 +1,45 @@
+POORA FOLDER LAGANE KA TAREEQA (safe, recommended)
+==================================================
+Kya behtar hai? -> POORA FOLDER (naya) behtar hai. Wajah: purani bekaar files
+(.gz, node_modules, purane backups) saaf ho jati hain aur code ke sab files ek hi
+version ki hoti hain. Magar 3 cheezein purani HI rakhni hain (neeche dekhein).
+
+STEP 0 — Zaroori backup (30 second)
+  1) Apna repo folder kholein:  D:\ZNZ\New folder\ZNZ
+  2) data\db.json  ko copy kar ke Desktop par rakh dein  (isme aap ka content/settings hai)
+
+STEP 1 — Is ZIP ko extract karein
+  Folder milega: ZNZ-WEBSITE-FINAL  (is ke andar seedha server.js hai)
+
+STEP 2 — Purane folder ko saaf karein (delete, magar 3 cheezein chhorein)
+  Repo folder (D:\ZNZ\New folder\ZNZ) mein:
+    - .git            <- CHHOREIN (GitHub Desktop isi se juda hai)
+    - data\db.json    <- CHHOREIN (aap ka content)  [agar folder saaf kar rahe hain to
+                          baad me Desktop wali copy wapas rakhna hai]
+    - public\uploads  <- CHHOREIN (aap ki upload ki hui tasveerein)
+  Baqi SAB files/folders delete kar dein.
+
+STEP 3 — Naye folder ka content paste karein
+  ZNZ-WEBSITE-FINAL ke ANDAR ka sab kuch (Ctrl+A -> Ctrl+C) repo folder me paste (Ctrl+V).
+  Agar poochhe: "Merge folders" = Yes, "Replace files" = Yes.
+  Ab data\db.json aur public\uploads ki purani files wapas rakhein (agar udd gayi hon).
+
+STEP 4 — Check (10 second)
+  Repo folder me ye nazar aayein: server.js, package.json, render.yaml, Dockerfile,
+  public, lib, data, .github, aur NAYE docs (ROUND14-AKHRI-UPDATE.md).
+
+STEP 5 — GitHub Desktop
+  * Left "Changes" me bohat si files dikhengi (purani delete + nayi add) — normal hai.
+  * Summary:   round 14 full
+  * Commit to main  ->  agar "Pull origin" ka message aaye to pehle Pull, phir Push origin.
+
+STEP 6 — Render
+  Render -> ZNZ -> Manual Deploy -> "Clear build cache & deploy"  (2-4 min)
+  Status Live hone ka intezaar.
+
+STEP 7 — Browser
+  https://znz.onrender.com  kholein -> Ctrl + Shift + R
+  Check: /api/version par  "version":"8.1.0"  aur  "build":"2026-10-26-r14"
+
+NOTE: Sirf 6 files wala chhota update (UPDATE-R14-FINAL.zip) bhi theek hai aur tez hai.
+      Poora folder tab behtar hai jab aap saaf-suthra start chahte hain.

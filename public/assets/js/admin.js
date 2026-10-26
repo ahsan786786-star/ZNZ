@@ -788,6 +788,7 @@
     const st = A.data.settings;
     const hs = st.hotSelling || {};
     const v = st.valuable || {};
+    const bgfx = st.bgfx || {};
     return `
       <div class="card">
         <h2>Notice / offer bar</h2>
@@ -830,6 +831,34 @@
         </div>
         ${fld('Section heading', 'hotSelling.title', hs.title || 'Most Loved This Season')}
         ${saveBtn()}
+      </div>
+
+      <div class="card">
+        <h2>Background bubbles / stars</h2>
+        <p class="hint">The entry page (posters, collection boxes, dresses) gets a few soft bubbles or tiny stars
+        behind the content — never on top of a photo or a box. Keep the number low (6–20).</p>
+        <div class="row">
+          <label class="fld"><span>What floats in the background</span>
+            <select data-set="bgfx.mode">
+              <option value="off" ${bgfx.mode === 'off' ? 'selected' : ''}>Nothing — clean background</option>
+              <option value="bubbles" ${!bgfx.mode || bgfx.mode === 'bubbles' ? 'selected' : ''}>Bubbles (soft gold)</option>
+              <option value="stars" ${bgfx.mode === 'stars' ? 'selected' : ''}>Stars (tiny sparkle)</option>
+              <option value="both" ${bgfx.mode === 'both' ? 'selected' : ''}>Both — bubbles + stars</option>
+            </select>
+          </label>
+          ${fld('How many (6–20 is best)', 'bgfx.count', bgfx.count == null ? 16 : bgfx.count, { type: 'number', num: true })}
+          <label class="fld"><span>Speed</span>
+            <select data-set="bgfx.speed">
+              ${[['0.5', 'Very slow'], ['0.8', 'Slow'], ['1', 'Normal'], ['1.5', 'Lively'], ['2', 'Fast']].map(([v, l]) => `<option value="${v}" ${String(bgfx.speed || 1) === v ? 'selected' : ''}>${l}</option>`).join('')}
+            </select>
+          </label>
+          <label class="fld"><span>How visible</span>
+            <select data-set="bgfx.opacity">
+              ${[['0.3', 'Faint'], ['0.55', 'Normal'], ['0.8', 'Clear'], ['1', 'Strong']].map(([v, l]) => `<option value="${v}" ${String(bgfx.opacity == null ? 0.55 : bgfx.opacity) === v ? 'selected' : ''}>${l}</option>`).join('')}
+            </select>
+          </label>
+        </div>
+        ${saveBtn('Save background')}
       </div>
 
       <div class="card">

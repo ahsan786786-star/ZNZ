@@ -211,11 +211,6 @@
         <div class="stat"><span>Complaints</span><b>${s.complaints}</b></div>
       </div>
       <div class="card owner-card">
-        <h2>Site status</h2>
-        <p class="hint">Kaunsa version chal raha hai, data kahan save ho raha hai, aur “keep awake” on hai ya nahi.</p>
-        <div id="buildInfo" style="font-size:13px;line-height:2;color:var(--ink-2)">Loading…</div>
-      </div>
-      <div class="card owner-card">
         <h2>Owner privileges</h2>
         <p class="hint">Aap ke paas admin se ziada rights hain:</p>
         <ul style="font-size:13px;color:var(--ink-2);line-height:1.8;margin:8px 0 0 18px;padding:0">
@@ -242,17 +237,7 @@
           </div>`).join('') : '<div class="empty">No orders yet.</div>'}
       </div>`;
   };
-  BIND.dashboard = () => {
-    fetch('/api/version', { cache: 'no-store' }).then((r) => r.json()).then((v) => {
-      const el = $('#buildInfo');
-      if (!el) return;
-      const ok = (b) => b ? '<b style="color:#1e8a52">on ✓</b>' : '<b style="color:#c0392b">off</b>';
-      el.innerHTML = '<div>Version: <b>' + esc(v.version || '—') + '</b> · build <b>' + esc(v.build || '—') + '</b></div>'
-        + '<div>Node: <b>' + esc(v.node || '—') + '</b> · uptime <b>' + Math.round((v.uptime || 0) / 60) + ' min</b></div>'
-        + '<div>Data storage: <b>' + (v.storage === 'github' ? 'GitHub repo (restart-proof ✓)' : 'local disk (backup lein!)') + '</b></div>'
-        + '<div>Keep awake: ' + ok(v.keepAwake) + (v.host ? ' <span style="color:var(--ink-3)">(' + esc(v.host) + ')</span>' : '') + '</div>';
-    }).catch(() => {});
- $$('[data-goto]').forEach((b) => (b.onclick = () => renderTab(b.dataset.goto))); };
+  BIND.dashboard = () => { $$('[data-goto]').forEach((b) => (b.onclick = () => renderTab(b.dataset.goto))); };
 
   /* ------------------------------ admin control ---------------------------- */
   VIEWS.admin = () => `
@@ -392,6 +377,7 @@
     const a = A.data.settings.animations || {};
     const L = A.data.settings.layout || {};
     const B = A.data.settings.bubbles || {};
+    const G = A.data.settings.bgfx || {};
     const trans = [
       ['fade', 'Fade'], ['slide', 'Slide (left / right)'], ['zoom', 'Zoom / scale'],
       ['cube', 'Cube rotation'], ['flip', 'Card flip'], ['coverflow', 'Cover flow / stack'],
@@ -402,7 +388,9 @@
     return `
       <div class="card owner-card">
         <h2>Layout</h2>
-        <p class="hint">Har jagah (collection page aur home ke “most loved” par) customer khud circular wheel, grid aur 13 mein se koi bhi transition chun sakta hai.</p>
+        <p class="hint">Aap tay karein — collection page aur home ke “most loved” par <b>circular wheel</b> ya <b>grid</b>,
+        aur neeche se <b>13 transitions</b> mein se koi bhi effect. <b>Customer ko koi option nahi dikhta</b> —
+        site hamesha aap ki chuni hui layout par chalti hai (jo cheez badalni ho, yahin se badal dein).</p>
         <div class="row">
           ${sel('Home “most loved” layout', 'layout.homeLoved', L.homeLoved || 'grid', [['grid', 'Grid'], ['wheel', 'Circular wheel']])}
           ${sel('Collection page layout', 'layout.collectionPage', L.collectionPage || 'grid', [['grid', 'Grid'], ['wheel', 'Circular wheel']])}
@@ -422,7 +410,22 @@
         ${saveBtn('Save motion')}
       </div>
       <div class="card owner-card">
-        <h2>Bubbles &amp; glitter</h2>
+        <h2>Storefront background — bubbles / stars</h2>
+        <p class="hint">Welcome ke baad jo asli website hai (posters, collections, dresses) — us ke <b>peechay</b> halki si
+        chamak chalti rahegi. Ye cheezein <b>kisi box, poster ya dress ke ooper nahi aatin</b>: canvas content ke neeche hai,
+        is liye tasveer unhe dhak leti hai. Sirf khali background mein nazar aati hain.</p>
+        <div class="row">
+          ${sel('Kya chalein', 'bgfx.mode', G.mode || 'bubbles', [['off', 'Kuch nahi — saaf background'], ['bubbles', 'Bubbles (soft gold)'], ['stars', 'Stars (chhoti chamak)'], ['both', 'Dono — bubbles + stars']])}
+          ${fld('Kitne (kam rakhein: 6–20)', 'bgfx.count', G.count == null ? 16 : G.count, { type: 'number', num: true })}
+          ${sel('Raftaar', 'bgfx.speed', String(G.speed || 1), [['0.5', 'Bohat dheemi'], ['0.8', 'Dheemi'], ['1', 'Normal'], ['1.5', 'Tez'], ['2', 'Bohat tez']])}
+          ${sel('Chamak (opacity)', 'bgfx.opacity', String(G.opacity == null ? 0.55 : G.opacity), [['0.3', 'Halki'], ['0.55', 'Normal'], ['0.8', 'Wazeh'], ['1', 'Poori']])}
+        </div>
+        <p class="hint" style="margin-top:8px">Tip: default <b>16 bubbles / halki chamak</b> sab se khoobsurat lagta hai aur slow phone par bhi asar nahi daalta.
+        Jo log “reduced motion” on rakhte hain, unke liye ye khud band rehta hai.</p>
+        ${saveBtn('Save background')}
+      </div>
+      <div class="card owner-card">
+        <h2>Welcome bubbles &amp; glitter</h2>
         <p class="hint">Welcome screen ke background bubbles — raftaar, quality aur burst hone par nikalne wala glitter sab aap ke haath me hai. Ye sirf welcome page par chalta hai.</p>
         <div class="row">
           ${fld('How many bubbles', 'bubbles.count', B.count || 38, { type: 'number', num: true })}
