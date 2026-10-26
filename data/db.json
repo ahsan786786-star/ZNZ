@@ -420,7 +420,7 @@
       "keywords": "bridal dresses, pakistani bridal dresses, barat lehenga, walima dress, mehndi dress, party wear, luxury bridal wear, Z&Z bridals, bridal couture pakistan"
     },
     "permissions": {
-      "adminSeesCustomerPhotos": true,
+      "adminSeesCustomerPhotos": false,
       "adminCanPosters": true,
       "adminCanCollections": true,
       "adminCanItems": true,
