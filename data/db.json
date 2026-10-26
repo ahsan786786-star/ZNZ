@@ -328,7 +328,13 @@
     "hero": {
       "autoplay": true,
       "intervalSec": 3,
-      "posters": []
+      "posters": [
+        {
+          "id": "pmvp1yj3b0",
+          "url": "/uploads/mvp1yi9y7def4b5d.webp",
+          "alt": ""
+        }
+      ]
     },
     "hotSelling": {
       "enabled": true,
