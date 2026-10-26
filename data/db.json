@@ -524,21 +524,6 @@
           "video": ""
         },
         {
-          "id": "noor",
-          "name": "Noor — Emerald Velvet Bridal",
-          "price": 0,
-          "order": 2,
-          "desc": "Emerald velvet bridal with antique gold dabka and kora work. Price on request — contact us on WhatsApp.",
-          "images": [
-            "/assets/img/collections/barat.webp"
-          ],
-          "views": 1,
-          "tags": [
-            "bridal",
-            "barat"
-          ]
-        },
-        {
           "id": "meher",
           "name": "Meher — Ruby Velvet Bridal",
           "price": 320000,
@@ -567,36 +552,6 @@
             "/assets/img/dresses/barat-5-sm.webp"
           ],
           "order": 4,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "rania",
-          "name": "Rania — Rust Organza Bridal",
-          "price": 240000,
-          "desc": "Rust organza bridal with hand-cut gold appliqué. Light on the shoulders, dramatic in movement.",
-          "images": [
-            "/assets/img/dresses/barat-4.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/barat-4-sm.webp"
-          ],
-          "order": 5,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "shabnam",
-          "name": "Shabnam — Plum Velvet Lehenga",
-          "price": 0,
-          "desc": "Plum velvet with deep gold embroidery. Price shared privately — message us on WhatsApp.",
-          "images": [
-            "/assets/img/dresses/barat-5.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/barat-5-sm.webp"
-          ],
-          "order": 6,
           "views": 0,
           "tags": []
         }
