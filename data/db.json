@@ -476,9 +476,9 @@
     },
     "bgfx": {
       "mode": "bubbles",
-      "count": 16,
-      "speed": 1,
-      "opacity": 0.55,
+      "count": 25,
+      "speed": "1",
+      "opacity": "0.55",
       "behind": true
     }
   },
