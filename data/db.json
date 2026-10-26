@@ -834,6 +834,16 @@
   ],
   "leads": [
     {
+      "id": "lmvozrem2obhh2",
+      "type": "order",
+      "name": "Tehreem Hafeez",
+      "contact": "03492294946",
+      "message": "Order ZNZ-F4CBE3",
+      "page": "/checkout",
+      "createdAt": "2026-10-26T08:25:15.962Z",
+      "read": false
+    },
+    {
       "id": "lmvozpvyhflgi4",
       "type": "order",
       "name": "Tehreem Hafeez",
@@ -847,6 +857,34 @@
   "complaints": [],
   "ratings": [],
   "orders": [
+    {
+      "id": "ZNZ-F4CBE3",
+      "name": "Tehreem Hafeez",
+      "phone": "03492294946",
+      "city": "Pakpatan",
+      "note": "Dito",
+      "currency": "PKR",
+      "items": [
+        {
+          "collectionId": "walima",
+          "itemId": "sitara",
+          "name": "Sitara — Blush Pearl Gown",
+          "image": "/assets/img/dresses/walima-2-sm.webp",
+          "price": 168000,
+          "qty": 1
+        },
+        {
+          "collectionId": "party",
+          "itemId": "nocturne",
+          "name": "Nocturne — Onyx Beaded Gown",
+          "image": "/assets/img/dresses/party-2-sm.webp",
+          "price": 84000,
+          "qty": 1
+        }
+      ],
+      "status": "new",
+      "createdAt": "2026-10-26T08:25:15.962Z"
+    },
     {
       "id": "ZNZ-7EC1AD",
       "name": "Tehreem Hafeez",
