@@ -494,12 +494,18 @@
       "items": [
         {
           "id": "zohra",
-          "name": "Zohra — Crimson Zardozi Lehenga",
-          "price": 285000,
+          "name": "Sassy by ---znz--- Crimson Zardozi Lehenga",
+          "price": 685000,
           "order": 1,
           "desc": "Deep crimson raw silk lehenga with hand zardozi, dabka and sequin work. Includes heavily worked dupatta and worked bodice.",
           "images": [
-            "/uploads/mvph93ds58343690.webp"
+            "/uploads/mvphdkrhbc4c5312.webp",
+            "/uploads/mvph93ds58343690.webp",
+            "/uploads/mvpha3sp1cf9e677.webp",
+            "/uploads/mvphat8l4ef5c9f9.webp",
+            "/uploads/mvphcmmxdbec2249.webp",
+            "/uploads/mvphbsim09bd461e.webp",
+            "/uploads/mvphexr63575c2d8.webp"
           ],
           "views": 6,
           "tags": [
@@ -507,7 +513,13 @@
             "barat"
           ],
           "thumbs": [
-            "/uploads/mvph93ds58343690-sm.webp"
+            "/uploads/mvphdkrhbc4c5312-sm.webp",
+            "/uploads/mvph93ds58343690-sm.webp",
+            "/uploads/mvpha3sp1cf9e677-sm.webp",
+            "/uploads/mvphat8l4ef5c9f9-sm.webp",
+            "/uploads/mvphcmmxdbec2249-sm.webp",
+            "/uploads/mvphbsim09bd461e-sm.webp",
+            "/uploads/mvphexr63575c2d8-sm.webp"
           ],
           "video": ""
         },
