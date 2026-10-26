@@ -1,11 +1,11 @@
 {
   "admin": {
-    "username": "admin",
-    "passSalt": "13ec4d792418059358a6270cb2672f57",
-    "passHash": "88257c3e332a28f36d6c6c9ccb2a6f5aabd882471552282ece3e6526a032c66fb12e434d09ce29bf491a6c4787138ffd16a5642406046d32f2b786e3b3e9d11d",
-    "pinSalt": "7791ac348f0cf154fc2d81e5752a2296",
-    "pinHash": "693b55047b8042750cf99bd0025ba23dff4e43de8dc7e07571533436064f2894cc23bc8af7174933b7ba962150eabb68951c74652da1fe9e9ca81cee4c808ca8",
-    "updatedAt": "2026-10-26T11:53:54.616Z"
+    "username": "zani@2726",
+    "passSalt": "f5c5a39246f05fc566a0f1a889e8b011",
+    "passHash": "c5d7261a14573436656deab1696474d6df4107da75d2753f4d58423ef89067a426ecf07b9fe5c59a57f8cd7fa4f21cbae828e45c8fae9c92bbca79e76b493741",
+    "pinSalt": "0fe05fed14d663fa736e4dc838f1facc",
+    "pinHash": "55b65f622574ed638dc457b3640047dd0e816cc759afa01bdecac1a111fbd0f17b6947002685b14339dd7ec2cc78b13ff5419a0fee69e85e7e40c75b24a17134",
+    "updatedAt": "2026-10-26T20:30:05.814Z"
   },
   "settings": {
     "brand": {
@@ -26,11 +26,11 @@
     },
     "notice": {
       "enabled": true,
-      "text": "New Eid Edit is live — free delivery on all orders above PKR 50,000. Limited pieces only!",
+      "text": "Stay tune for new collection.",
       "link": ""
     },
     "social": {
-      "instagram": "",
+      "instagram": "https://www.instagram.com/zaninzaru",
       "facebook": "",
       "youtube": "",
       "tiktok": "",
@@ -330,6 +330,11 @@
       "intervalSec": 3,
       "posters": [
         {
+          "id": "pmvp1yj3b0",
+          "url": "/uploads/mvp1yi9y7def4b5d.webp",
+          "alt": ""
+        },
+        {
           "id": "pmvp2dmar0",
           "url": "/uploads/mvp2dlgeffa1c365.webp",
           "alt": ""
@@ -337,11 +342,6 @@
         {
           "id": "pmvp2h00z1",
           "url": "/uploads/mvp2gu50236b2290.webp",
-          "alt": ""
-        },
-        {
-          "id": "pmvp1yj3b0",
-          "url": "/uploads/mvp1yi9y7def4b5d.webp",
           "alt": ""
         },
         {
@@ -357,7 +357,7 @@
       "collectionId": "",
       "layout": "wheel",
       "limit": 12,
-      "title": "Most Loved This Season"
+      "title": "Most Demanding Articals."
     },
     "collectionPage": {
       "layout": "wheel",
@@ -420,7 +420,7 @@
       "keywords": "bridal dresses, pakistani bridal dresses, barat lehenga, walima dress, mehndi dress, party wear, luxury bridal wear, Z&Z bridals, bridal couture pakistan"
     },
     "permissions": {
-      "adminSeesCustomerPhotos": true,
+      "adminSeesCustomerPhotos": false,
       "adminCanPosters": true,
       "adminCanCollections": true,
       "adminCanItems": true,
@@ -476,9 +476,9 @@
     },
     "bgfx": {
       "mode": "bubbles",
-      "count": 16,
-      "speed": 1,
-      "opacity": 0.55,
+      "count": 25,
+      "speed": "1",
+      "opacity": "0.55",
       "behind": true
     }
   },
@@ -488,55 +488,40 @@
       "name": "Barat Wear",
       "order": 1,
       "enabled": true,
-      "image": "/assets/img/collections/barat.webp",
+      "image": "/uploads/mvpfu9qb729ffb3b.webp",
       "banner": "/assets/img/posters/poster-2.webp",
       "description": "Heirloom reds, deep emerald and antique gold — the Z&Z barat edit.",
       "items": [
         {
           "id": "zohra",
-          "name": "Zohra — Crimson Zardozi Lehenga",
-          "price": 285000,
+          "name": "Sassy by ---znz--- Crimson Zardozi Lehenga",
+          "price": 685000,
           "order": 1,
           "desc": "Deep crimson raw silk lehenga with hand zardozi, dabka and sequin work. Includes heavily worked dupatta and worked bodice.",
           "images": [
-            "/assets/img/dresses/barat-1.webp",
-            "/assets/img/collections/barat.webp"
+            "/uploads/mvphdkrhbc4c5312.webp",
+            "/uploads/mvph93ds58343690.webp",
+            "/uploads/mvpha3sp1cf9e677.webp",
+            "/uploads/mvphat8l4ef5c9f9.webp",
+            "/uploads/mvphcmmxdbec2249.webp",
+            "/uploads/mvphbsim09bd461e.webp",
+            "/uploads/mvphexr63575c2d8.webp"
           ],
-          "views": 6,
+          "views": 9,
           "tags": [
             "bridal",
             "barat"
-          ]
-        },
-        {
-          "id": "noor",
-          "name": "Noor — Emerald Velvet Bridal",
-          "price": 0,
-          "order": 2,
-          "desc": "Emerald velvet bridal with antique gold dabka and kora work. Price on request — contact us on WhatsApp.",
-          "images": [
-            "/assets/img/collections/barat.webp"
-          ],
-          "views": 0,
-          "tags": [
-            "bridal",
-            "barat"
-          ]
-        },
-        {
-          "id": "meher",
-          "name": "Meher — Ruby Velvet Bridal",
-          "price": 320000,
-          "desc": "Ruby red velvet bridal with antique gold dabka, kora and sequin work. Includes a four-sided heavily worked dupatta.",
-          "images": [
-            "/assets/img/dresses/barat-2.webp"
           ],
           "thumbs": [
-            "/assets/img/dresses/barat-2-sm.webp"
+            "/uploads/mvphdkrhbc4c5312-sm.webp",
+            "/uploads/mvph93ds58343690-sm.webp",
+            "/uploads/mvpha3sp1cf9e677-sm.webp",
+            "/uploads/mvphat8l4ef5c9f9-sm.webp",
+            "/uploads/mvphcmmxdbec2249-sm.webp",
+            "/uploads/mvphbsim09bd461e-sm.webp",
+            "/uploads/mvphexr63575c2d8-sm.webp"
           ],
-          "order": 3,
-          "views": 0,
-          "tags": []
+          "video": ""
         },
         {
           "id": "gulbahar",
@@ -552,47 +537,18 @@
             "/assets/img/dresses/barat-5-sm.webp"
           ],
           "order": 4,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "rania",
-          "name": "Rania — Rust Organza Bridal",
-          "price": 240000,
-          "desc": "Rust organza bridal with hand-cut gold appliqué. Light on the shoulders, dramatic in movement.",
-          "images": [
-            "/assets/img/dresses/barat-4.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/barat-4-sm.webp"
-          ],
-          "order": 5,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "shabnam",
-          "name": "Shabnam — Plum Velvet Lehenga",
-          "price": 0,
-          "desc": "Plum velvet with deep gold embroidery. Price shared privately — message us on WhatsApp.",
-          "images": [
-            "/assets/img/dresses/barat-5.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/barat-5-sm.webp"
-          ],
-          "order": 6,
-          "views": 0,
+          "views": 5,
           "tags": []
         }
-      ]
+      ],
+      "video": ""
     },
     {
       "id": "walima",
       "name": "Walima Wear",
       "order": 2,
       "enabled": true,
-      "image": "/assets/img/collections/walima.webp",
+      "image": "/uploads/mvpfyxq3ee1dc028.webp",
       "banner": "",
       "description": "Ivory, pearl and blush — softly glowing walima couture.",
       "items": [
@@ -672,93 +628,44 @@
           "views": 0,
           "tags": []
         }
-      ]
+      ],
+      "video": ""
     },
     {
       "id": "mehndi",
       "name": "Mehndi Wear",
       "order": 3,
       "enabled": true,
-      "image": "/assets/img/collections/mehndi.webp",
+      "image": "/uploads/mvpgl0ua183dd019.webp",
       "banner": "",
       "description": "Vivid chartreuse, mirror work and gota — made to dance in.",
       "items": [
         {
           "id": "sahar",
-          "name": "Sahar — Chartreuse Mirror Lehenga",
-          "price": 96000,
+          "name": "Amgrakha style — mustard yellow Lehenga amgrakha gown",
+          "price": 0,
           "order": 1,
-          "desc": "Chartreuse silk lehenga with hand mirror work and gold gota edging. Lightweight and made to twirl.",
+          "desc": "Chartreuse silk lehenga with net gown hand work with embalishment and multi Chatta Patti edging. Heavy flare more than 360⁰",
           "images": [
-            "/assets/img/dresses/mehndi-1.webp",
-            "/assets/img/collections/mehndi.webp"
+            "/uploads/mvplu5dy6383d3f0.webp",
+            "/uploads/mvpluywv68d87454.webp",
+            "/uploads/mvplvsek1e45f95b.webp",
+            "/uploads/mvplwjqf7ad97ee7.webp"
           ],
-          "views": 0,
+          "views": 4,
           "tags": [
             "mehndi"
-          ]
-        },
-        {
-          "id": "rang",
-          "name": "Rang — Mustard Gharara",
-          "price": 96000,
-          "desc": "Mustard gharara with gota and mirror work, paired with a fuchsia dupatta.",
-          "images": [
-            "/assets/img/dresses/mehndi-2.webp"
           ],
           "thumbs": [
-            "/assets/img/dresses/mehndi-2-sm.webp"
+            "/uploads/mvplu5dy6383d3f0-sm.webp",
+            "/uploads/mvpluywv68d87454-sm.webp",
+            "/uploads/mvplvsek1e45f95b-sm.webp",
+            "/uploads/mvplwjqf7ad97ee7-sm.webp"
           ],
-          "order": 2,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "bahar",
-          "name": "Bahar — Emerald Mirror Lehenga",
-          "price": 112000,
-          "desc": "Emerald green lehenga with real mirror work and gold edging. Made to dance.",
-          "images": [
-            "/assets/img/dresses/mehndi-3.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/mehndi-3-sm.webp"
-          ],
-          "order": 3,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "sona",
-          "name": "Sona — Amber Lehnga",
-          "price": 88000,
-          "desc": "Amber and gold lehnga in lightweight silk — perfect for long mehndi nights.",
-          "images": [
-            "/assets/img/dresses/mehndi-4.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/mehndi-4-sm.webp"
-          ],
-          "order": 4,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "mori",
-          "name": "Mori — Teal Chiffon Mehndi",
-          "price": 0,
-          "desc": "Teal chiffon with mirror embroidery. Price on request.",
-          "images": [
-            "/assets/img/dresses/mehndi-5.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/mehndi-5-sm.webp"
-          ],
-          "order": 5,
-          "views": 0,
-          "tags": []
+          "video": ""
         }
-      ]
+      ],
+      "video": ""
     },
     {
       "id": "party",
@@ -779,7 +686,7 @@
             "/assets/img/dresses/party-1.webp",
             "/assets/img/collections/party.webp"
           ],
-          "views": 1,
+          "views": 7,
           "tags": [
             "party"
           ]
@@ -798,7 +705,7 @@
             "/assets/img/dresses/party-5-sm.webp"
           ],
           "order": 2,
-          "views": 0,
+          "views": 5,
           "tags": []
         },
         {
@@ -813,7 +720,7 @@
             "/assets/img/dresses/party-2-sm.webp"
           ],
           "order": 3,
-          "views": 0,
+          "views": 2,
           "tags": []
         },
         {
@@ -852,6 +759,26 @@
   ],
   "leads": [
     {
+      "id": "lmvphnatxhc0gx",
+      "type": "valuable_customer",
+      "name": "",
+      "contact": "arslanhafeez3046461275@gmail.com",
+      "message": "",
+      "page": "/",
+      "createdAt": "2026-10-26T16:45:57.525Z",
+      "read": false
+    },
+    {
+      "id": "lmvph4bzfn6rb3",
+      "type": "valuable_customer",
+      "name": "",
+      "contact": "03037054660",
+      "message": "",
+      "page": "/look",
+      "createdAt": "2026-10-26T16:31:12.555Z",
+      "read": false
+    },
+    {
       "id": "lmvozrem2obhh2",
       "type": "order",
       "name": "Tehreem Hafeez",
@@ -874,65 +801,16 @@
   ],
   "complaints": [],
   "ratings": [],
-  "orders": [
-    {
-      "id": "ZNZ-F4CBE3",
-      "name": "Tehreem Hafeez",
-      "phone": "03492294946",
-      "city": "Pakpatan",
-      "note": "Dito",
-      "currency": "PKR",
-      "items": [
-        {
-          "collectionId": "walima",
-          "itemId": "sitara",
-          "name": "Sitara — Blush Pearl Gown",
-          "image": "/assets/img/dresses/walima-2-sm.webp",
-          "price": 168000,
-          "qty": 1
-        },
-        {
-          "collectionId": "party",
-          "itemId": "nocturne",
-          "name": "Nocturne — Onyx Beaded Gown",
-          "image": "/assets/img/dresses/party-2-sm.webp",
-          "price": 84000,
-          "qty": 1
-        }
-      ],
-      "status": "new",
-      "createdAt": "2026-10-26T08:25:15.962Z"
-    },
-    {
-      "id": "ZNZ-7EC1AD",
-      "name": "Tehreem Hafeez",
-      "phone": "03492294946",
-      "city": "Pakpatan",
-      "note": "Dito same",
-      "currency": "PKR",
-      "items": [
-        {
-          "collectionId": "party",
-          "itemId": "lumen",
-          "name": "Lumen — Champagne Sequin Gown",
-          "image": "/assets/img/dresses/party-1-sm.webp",
-          "price": 62000,
-          "qty": 1
-        }
-      ],
-      "status": "new",
-      "createdAt": "2026-10-26T08:24:05.129Z"
-    }
-  ],
+  "orders": [],
   "subscribers": [],
   "looks": [],
   "owner": {
-    "username": "1234567890123",
-    "passSalt": "b4e556f24829455f1724a2255720d9f1",
-    "passHash": "c364f49bfdff3ffc08b29e795f46bfa05539b68b9545387c8a32336e74f6545c81c64fafd690a0d283131e516f583b90c00be3b281e0d1fe9f3b0ed7b71858ba",
+    "username": "36402@79855811",
+    "passSalt": "3a248de04dab2308a8409830a37305cb",
+    "passHash": "39c7adda257fe0d8217fc6b438c855e7097e121898327d57f06e377212775ee0486a8aff980539c9c922eb92a2ff2c1e2776bad8252f8f54e1cf5b217ecd4eaf",
     "pinSalt": "8d03c4a15e9f66fd96c243a24ebc9a7d",
     "pinHash": "d0faac3096016ff498b4c73ebe463c3a2c08b7d7396f75e87fd97a29d1ddd4690835769adc93ea8be2676d756f462422bf5c41dd129d7700a679d6d9c918626a",
-    "updatedAt": "2026-10-26T11:53:54.707Z"
+    "updatedAt": "2026-10-26T19:57:10.124Z"
   },
   "tryons": []
 }
