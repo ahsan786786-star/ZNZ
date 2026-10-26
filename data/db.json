@@ -434,8 +434,8 @@
       "adminCanAds": false
     },
     "layout": {
-      "collectionPage": "grid",
-      "homeLoved": "grid",
+      "collectionPage": "wheel",
+      "homeLoved": "wheel",
       "showWheel": false
     },
     "animations": {
