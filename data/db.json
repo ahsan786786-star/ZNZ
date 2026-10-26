@@ -657,18 +657,27 @@
       "items": [
         {
           "id": "sahar",
-          "name": "Sahar — Chartreuse Mirror Lehenga",
-          "price": 96000,
+          "name": "Amgrakha style — mustard yellow Lehenga amgrakha gown",
+          "price": 0,
           "order": 1,
-          "desc": "Chartreuse silk lehenga with hand mirror work and gold gota edging. Lightweight and made to twirl.",
+          "desc": "Chartreuse silk lehenga with net gown hand work with embalishment and multi Chatta Patti edging. Heavy flare more than 360⁰",
           "images": [
-            "/assets/img/dresses/mehndi-1.webp",
-            "/assets/img/collections/mehndi.webp"
+            "/uploads/mvplu5dy6383d3f0.webp",
+            "/uploads/mvpluywv68d87454.webp",
+            "/uploads/mvplvsek1e45f95b.webp",
+            "/uploads/mvplwjqf7ad97ee7.webp"
           ],
           "views": 0,
           "tags": [
             "mehndi"
-          ]
+          ],
+          "thumbs": [
+            "/uploads/mvplu5dy6383d3f0-sm.webp",
+            "/uploads/mvpluywv68d87454-sm.webp",
+            "/uploads/mvplvsek1e45f95b-sm.webp",
+            "/uploads/mvplwjqf7ad97ee7-sm.webp"
+          ],
+          "video": ""
         }
       ],
       "video": ""
