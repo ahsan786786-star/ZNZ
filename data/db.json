@@ -488,7 +488,7 @@
       "name": "Barat Wear",
       "order": 1,
       "enabled": true,
-      "image": "/assets/img/collections/barat.webp",
+      "image": "/uploads/mvpfu9qb729ffb3b.webp",
       "banner": "/assets/img/posters/poster-2.webp",
       "description": "Heirloom reds, deep emerald and antique gold — the Z&Z barat edit.",
       "items": [
@@ -585,7 +585,8 @@
           "views": 0,
           "tags": []
         }
-      ]
+      ],
+      "video": ""
     },
     {
       "id": "walima",
