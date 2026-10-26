@@ -681,7 +681,7 @@
       "name": "Mehndi Wear",
       "order": 3,
       "enabled": true,
-      "image": "/assets/img/collections/mehndi.webp",
+      "image": "/uploads/mvpgl0ua183dd019.webp",
       "banner": "",
       "description": "Vivid chartreuse, mirror work and gota — made to dance in.",
       "items": [
@@ -760,7 +760,8 @@
           "views": 0,
           "tags": []
         }
-      ]
+      ],
+      "video": ""
     },
     {
       "id": "party",
