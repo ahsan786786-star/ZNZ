@@ -612,21 +612,6 @@
           "order": 4,
           "views": 0,
           "tags": []
-        },
-        {
-          "id": "laila",
-          "name": "Laila — Lilac Blush Gown",
-          "price": 0,
-          "desc": "Lilac blush gown with silver embroidery. Price on request.",
-          "images": [
-            "/assets/img/dresses/walima-5.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/walima-5-sm.webp"
-          ],
-          "order": 5,
-          "views": 0,
-          "tags": []
         }
       ],
       "video": ""
