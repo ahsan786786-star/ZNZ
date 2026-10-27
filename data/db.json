@@ -677,21 +677,6 @@
       "description": "Champagne shimmer and modern silhouettes for evening's glow.",
       "items": [
         {
-          "id": "lumen",
-          "name": "Lumen — Champagne Sequin Gown",
-          "price": 62000,
-          "order": 1,
-          "desc": "Liquid champagne sequins with a draped shoulder and fitted silhouette. Fully lined.",
-          "images": [
-            "/assets/img/dresses/party-1.webp",
-            "/assets/img/collections/party.webp"
-          ],
-          "views": 7,
-          "tags": [
-            "party"
-          ]
-        },
-        {
           "id": "aurum",
           "name": "Aurum — Rose Gold Pleat",
           "price": 72000,
