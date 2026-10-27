@@ -703,16 +703,15 @@
           "price": 72000,
           "desc": "Rose gold pleated gown with a soft cowl neck and a sweeping hem.",
           "images": [
-            "/assets/img/dresses/party-3.webp",
-            "/assets/img/dresses/party-5.webp"
+            "/uploads/mvqmgl24eeda3af4.webp"
           ],
           "thumbs": [
-            "/assets/img/dresses/party-3-sm.webp",
-            "/assets/img/dresses/party-5-sm.webp"
+            "/uploads/mvqmgl24eeda3af4-sm.webp"
           ],
           "order": 2,
           "views": 5,
-          "tags": []
+          "tags": [],
+          "video": ""
         },
         {
           "id": "nocturne",
