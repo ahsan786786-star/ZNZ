@@ -703,60 +703,25 @@
           "price": 72000,
           "desc": "Rose gold pleated gown with a soft cowl neck and a sweeping hem.",
           "images": [
-            "/uploads/mvqmgl24eeda3af4.webp"
+            "/uploads/mvqmgl24eeda3af4.webp",
+            "/uploads/mvqmigzx25c72131.webp",
+            "/uploads/mvqmi1qwf384ca05.webp",
+            "/uploads/mvqmi8w46880d1f4.webp",
+            "/uploads/mvqmirvrd68eb47f.webp",
+            "/uploads/mvqmkn7o58042318.webp"
           ],
           "thumbs": [
-            "/uploads/mvqmgl24eeda3af4-sm.webp"
+            "/uploads/mvqmgl24eeda3af4-sm.webp",
+            "/uploads/mvqmigzx25c72131-sm.webp",
+            "/uploads/mvqmi1qwf384ca05-sm.webp",
+            "/uploads/mvqmi8w46880d1f4-sm.webp",
+            "/uploads/mvqmirvrd68eb47f-sm.webp",
+            "/uploads/mvqmkn7o58042318-sm.webp"
           ],
           "order": 2,
           "views": 5,
           "tags": [],
           "video": ""
-        },
-        {
-          "id": "nocturne",
-          "name": "Nocturne — Onyx Beaded Gown",
-          "price": 84000,
-          "desc": "Black beaded gown with one-shoulder draping and a fluid column silhouette.",
-          "images": [
-            "/assets/img/dresses/party-2.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/party-2-sm.webp"
-          ],
-          "order": 3,
-          "views": 2,
-          "tags": []
-        },
-        {
-          "id": "verdant",
-          "name": "Verdant — Emerald Drape",
-          "price": 78000,
-          "desc": "Emerald satin drape gown with a hidden waist tie.",
-          "images": [
-            "/assets/img/dresses/party-4.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/party-4-sm.webp"
-          ],
-          "order": 4,
-          "views": 0,
-          "tags": []
-        },
-        {
-          "id": "copper",
-          "name": "Copper — Rose Copper Shimmer",
-          "price": 66000,
-          "desc": "Copper shimmer cocktail gown with fine pleats and a fitted bodice.",
-          "images": [
-            "/assets/img/dresses/party-5.webp"
-          ],
-          "thumbs": [
-            "/assets/img/dresses/party-5-sm.webp"
-          ],
-          "order": 5,
-          "views": 0,
-          "tags": []
         }
       ],
       "video": ""
