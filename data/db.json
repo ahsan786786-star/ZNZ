@@ -425,13 +425,13 @@
       "adminCanCollections": true,
       "adminCanItems": true,
       "adminCanHome": true,
-      "adminCanLook": true,
+      "adminCanLook": false,
       "adminCanContact": true,
-      "adminCanPages": true,
+      "adminCanPages": false,
       "adminCanSecurity": true,
-      "adminCanWallpapers": false,
+      "adminCanWallpapers": true,
       "adminCanInbox": true,
-      "adminCanAds": false
+      "adminCanAds": true
     },
     "layout": {
       "collectionPage": "wheel",
