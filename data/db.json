@@ -447,15 +447,15 @@
       "wheelStyle": "half"
     },
     "bubbles": {
-      "count": 38,
+      "count": 80,
       "sideBias": true,
       "styles": "glass",
       "burst": true,
-      "speed": 1,
+      "speed": "1",
       "quality": "high",
       "glitter": true,
       "glitterAmount": 260,
-      "glitterFall": 1
+      "glitterFall": "1"
     },
     "look": {
       "enabled": true,
