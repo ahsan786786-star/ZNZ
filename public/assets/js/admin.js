@@ -648,7 +648,7 @@
             <img class="sm" src="${esc((it.thumbs && it.thumbs[0]) || it.images[0] || '')}" alt="">
             <div>
               <h4>${esc(it.name)}</h4>
-              <p>${it.price ? 'Rs ' + Number(it.price).toLocaleString('en-US') : 'Contact for pricing'} · ${it.images.length} photo${it.images.length === 1 ? '' : 's'} · ${it.views || 0} views</p>
+              <p>${it.price ? 'Rs ' + Number(it.price).toLocaleString('en-US') : 'Contact for pricing'} · ${it.images.length} photo${it.images.length === 1 ? '' : 's'} · ${it.views || 0} views${colIdsOf(it.id).filter((x) => x !== col.id).length ? ' · <b style="color:var(--gold-2)">also in ' + colIdsOf(it.id).filter((x) => x !== col.id).map((x) => esc((A.data.collections.find((c) => c.id === x) || {}).name || x)).join(', ') + '</b>' : ''}</p>
             </div>
             <div class="actions">
               <button class="btn sm" data-iup="${esc(it.id)}" ${i === 0 ? 'disabled' : ''}>↑</button>
@@ -669,7 +669,10 @@
       const items = (col.items || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
       if (t.dataset.iedit) return openItemEditor(t.dataset.iedit);
       if (t.dataset.idel) {
-        if (!confirm('Delete this dress?')) return;
+        const also = colIdsOf(t.dataset.idel).filter((x) => x !== col.id);
+        if (!confirm(also.length
+          ? 'This dress is also shown in: ' + also.map((x) => (A.data.collections.find((c) => c.id === x) || {}).name || x).join(', ') + '.\nDelete it from everywhere?'
+          : 'Delete this dress?')) return;
         await api(`/api/admin/collections/${encodeURIComponent(col.id)}/items/${encodeURIComponent(t.dataset.idel)}`, { method: 'DELETE' });
         return reload('items');
       }
@@ -684,9 +687,15 @@
   };
 
   let draftImages = [];
+  /* which other collections already show this dress (one dress, many collections) */
+  function colIdsOf(itemId) {
+    return (A.data.collections || []).filter((c) => (c.items || []).some((x) => x.id === itemId)).map((c) => c.id);
+  }
+
   function openItemEditor(itemId) {
     const col = A.data.collections.find((c) => c.id === A.itemsCol);
     const item = itemId ? (col.items || []).find((x) => x.id === itemId) : null;
+    const linked = itemId ? colIdsOf(itemId) : [];
     draftImages = item ? item.images.map((u, i) => ({ url: u, thumb: (item.thumbs || [])[i] || u })) : [];
     const box = $('#pickModal');
     box.hidden = false;
@@ -696,6 +705,11 @@
       <div class="row">
         <label class="fld"><span>Price in PKR (leave empty = Contact for pricing)</span><input id="iPrice" type="number" min="0" step="500" value="${item && item.price ? item.price : ''}" placeholder="285000"></label>
         <label class="fld"><span>Description (optional)</span><textarea id="iDesc" maxlength="1000" style="min-height:70px">${esc(item ? item.desc : '')}</textarea></label>
+      </div>
+      <span style="font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);display:block;margin-top:14px">Also show in these collections</span>
+      <p style="font-size:11px;color:var(--ink-3);margin:4px 0 8px">One dress, one set of photos — tick more collections to show it there too (heavy party wear that is also bridal, etc.).</p>
+      <div class="col-checks" id="iCols">
+        ${A.data.collections.map((c) => `<label class="col-check"><input type="checkbox" value="${esc(c.id)}" ${c.id === col.id || linked.includes(c.id) ? 'checked' : ''} ${c.id === col.id ? 'disabled' : ''}><span>${esc(c.name)}</span></label>`).join('')}
       </div>
       <span style="font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3)">Photos (first photo is the cover)</span>
       <div class="drop" id="dropItem" style="margin-top:6px">Click or drop multiple photos here</div>
@@ -777,9 +791,17 @@
       const url = item
         ? `/api/admin/collections/${encodeURIComponent(col.id)}/items/${encodeURIComponent(item.id)}`
         : `/api/admin/collections/${encodeURIComponent(col.id)}/items`;
-      const res = await api(url, { method: item ? 'PUT' : 'POST', body: payload });
-      if (res.ok) { close(); await reload('items'); flash(); toast('Dress saved'); }
-      else toast(res.error || 'Could not save');
+      const boxes = Array.from(box.querySelectorAll('#iCols input:checked')).map((i) => i.value);
+      let res = await api(url, { method: item ? 'PUT' : 'POST', body: Object.assign({}, payload, { extraCollections: boxes }) });
+      if (!res.ok) return toast(res.error || 'Could not save');
+      /* keep the other collections in step with the tick boxes */
+      if (item) {
+        const before = colIdsOf(item.id);
+        const wanted = boxes.filter((id) => id !== col.id);
+        for (const cid of wanted) if (!before.includes(cid)) await api(`/api/admin/collections/${encodeURIComponent(cid)}/items/${encodeURIComponent(item.id)}/link`, { method: 'POST', body: { on: true } });
+        for (const cid of before) if (cid !== col.id && !wanted.includes(cid)) await api(`/api/admin/collections/${encodeURIComponent(cid)}/items/${encodeURIComponent(item.id)}/link`, { method: 'POST', body: { on: false } });
+      }
+      close(); await reload('items'); flash(); toast('Dress saved');
     };
   }
 

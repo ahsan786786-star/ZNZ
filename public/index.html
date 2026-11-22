@@ -7,7 +7,7 @@
 <meta name="description" content="__DESC__" />
 <meta name="keywords" content="__KEYWORDS__" />
 <link rel="canonical" href="__CANONICAL__" />
-<meta name="robots" content="index,follow,max-image-preview:large" />
+<meta name="robots" content="__ROBOTS__" />
 <meta name="google-site-verification" content="8KRLRA2g2Q0R9Cwo087GEb4QmMcaxqXwQ9H4nZ0qMAk" />
 <meta name="theme-color" content="#f7f2e8" />
 <meta name="format-detection" content="telephone=no" />
@@ -34,9 +34,9 @@
 
 <link rel="preload" href="/assets/fonts/great-vibes-400-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="/assets/fonts/cormorant-garamond-600-latin.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="/assets/img/logo-3d@2x.png?v=__V__" as="image" />
+<link rel="preload" href="/assets/img/logo-3d-480.png?v=__V__" as="image" fetchpriority="high" />
 <link rel="stylesheet" href="/assets/fonts/fonts.css?v=__V__" />
-<link rel="stylesheet" href="/assets/css/app.css?v=__V__" />
+<link rel="stylesheet" href="/assets/css/app.min.css?v=__V__" />
 
 <!-- First-paint critical CSS: the welcome screen looks complete before any JS runs -->
 <style>
@@ -119,7 +119,7 @@
   </div>
   <div class="wi">
     <p class="ww" id="welcomeWord">Welcome</p>
-    <div class="lw"><div class="logo3d" id="welcomeLogo"><img src="/assets/img/logo-3d@2x.png?v=__V__" alt="Z&amp;Z logo" width="592" height="650" decoding="async" /></div></div>
+    <div class="lw"><div class="logo3d" id="welcomeLogo"><img src="/assets/img/logo-3d-480.png?v=__V__" srcset="/assets/img/logo-3d-480.png?v=__V__ 480w, /assets/img/logo-3d.png?v=__V__ 592w" sizes="min(88vw,39vh,430px)" alt="Z&amp;Z logo" width="592" height="650" decoding="async" fetchpriority="high" /></div></div>
     <h1 class="bn" id="welcomeBrand">Z&amp;Z</h1>
     <p class="bl" id="welcomeTag">Luxury Bridals &amp; Formals</p>
   </div>
@@ -141,8 +141,8 @@
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script type="application/ld+json">__JSONLD__</script>
-<script src="/assets/js/welcome.js?v=__V__" defer></script>
-<script src="/assets/js/tryon.js?v=__V__" defer></script>
-<script src="/assets/js/app.js?v=__V__" defer></script>
+__EXTRA_LD__
+<script src="/assets/js/welcome.min.js?v=__V__" defer></script>
+<script src="/assets/js/app.min.js?v=__V__" defer></script>
 </body>
 </html>

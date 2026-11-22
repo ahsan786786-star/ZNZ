@@ -188,6 +188,43 @@ function assetVersion() {
   ASSET_V = String(h); ASSET_AT = Date.now();
   return ASSET_V;
 }
+/* Pre-minified assets (assets/js/x.min.js, assets/css/x.min.css) are created by
+   tools/minify.js and picked up here automatically — same URL, ~30-50 % smaller. */
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  const m = /^\/assets\/(js|css)\/([a-z0-9_.-]+)\.(js|css)$/i.exec(req.path);
+  if (!m) return next();
+  const min = path.join(PUBLIC, 'assets', m[1], m[2] + '.min.' + m[3]);
+  try {
+    const st = fs.statSync(min);
+    const src = path.join(PUBLIC, 'assets', m[1], m[2] + '.' + m[3]);
+    const srcSt = fs.existsSync(src) ? fs.statSync(src) : null;
+    if (srcSt && st.mtimeMs < srcSt.mtimeMs) return next();   /* stale min → use the source */
+    res.setHeader('Content-Type', m[3] === 'js' ? 'application/javascript; charset=utf-8' : 'text/css; charset=utf-8');
+    res.setHeader('Cache-Control', req.query.v ? 'public, max-age=31536000, immutable' : 'public, max-age=0, must-revalidate');
+    res.setHeader('Last-Modified', st.mtime.toUTCString());
+    const acceptsGzip = /\bgzip\b/.test(req.headers['accept-encoding'] || '');
+    if (acceptsGzip && st.size > 1400) {
+      const gz = min + '.gz';
+      try {
+        const gzSt = fs.statSync(gz);
+        if (gzSt.mtimeMs >= st.mtimeMs) {
+          res.setHeader('Content-Encoding', 'gzip');
+          res.setHeader('Vary', 'Accept-Encoding');
+          res.setHeader('Content-Length', gzSt.size);
+          return fs.createReadStream(gz).pipe(res);
+        }
+      } catch (e) { /* fall through to the plain file */ }
+      const buf = zlib.gzipSync(fs.readFileSync(min), { level: 9 });
+      res.setHeader('Content-Encoding', 'gzip');
+      res.setHeader('Vary', 'Accept-Encoding');
+      res.setHeader('Content-Length', buf.length);
+      return res.end(buf);
+    }
+    return fs.createReadStream(min).pipe(res);
+  } catch (e) { return next(); }
+});
+
 app.use('/assets', express.static(path.join(PUBLIC, 'assets'), {
   setHeaders: (res, file, stat) => {
     const versioned = !!res.req.query.v;
@@ -196,7 +233,11 @@ app.use('/assets', express.static(path.join(PUBLIC, 'assets'), {
     res.setHeader('Last-Modified', stat.mtime.toUTCString());
   }
 }));
-app.use('/uploads', express.static(UPLOADS, { maxAge: '30d' }));
+app.use('/uploads', express.static(UPLOADS, {
+  maxAge: '365d',
+  immutable: true,
+  setHeaders: (res) => res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+}));
 
 /* ------------------------------ helpers --------------------------------- */
 const THUMB_CACHE = new Map();
@@ -285,6 +326,10 @@ function publicPayload() {
     bgfx: s.bgfx || {},
     look: Object.assign({}, s.look || {}, { backgrounds: backgrounds() }),
     ads: activeAds(s.ads),
+    pages: (s.pages || []).filter((x) => x && x.enabled !== false && x.slug).map((x) => ({
+      slug: x.slug, title: x.title, showInMenu: x.showInMenu !== false, order: Number(x.order) || 0
+    })),
+    credit: s.credit || {},
     permissions: { adminSeesCustomerPhotos: !!(s.permissions || {}).adminSeesCustomerPhotos },
     collections: (db.collections || [])
       .filter((c) => c.enabled !== false)
@@ -949,8 +994,29 @@ app.use((req, res, next) => {
   next();
 });
 
+/* Visitor analytics — every real page open is counted once (assets, api and
+   the panels excluded). Fire-and-forget, so it can never slow the shop. */
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  const p = req.path;
+  if (p.startsWith('/api') || p.startsWith('/assets') || p.startsWith('/uploads') ||
+      p.startsWith('/admin') || p.startsWith('/owner') || p.startsWith('/sw.js') ||
+      p.startsWith('/manifest') || p.startsWith('/robots') || p.startsWith('/sitemap') ||
+      p === '/favicon.ico') return next();
+  try { analytics.pageView({ vid: visitorId(req), path: p, ua: req.headers['user-agent'] }); } catch (e) {}
+  next();
+});
+
 app.post('/api/ping', (req, res) => {
   const vid = visitorId(req) || '';
+  /* the installed app announces itself once per open */
+  if ((req.body || {}).standalone) {
+    const ua = req.headers['user-agent'];
+    const k = 'open:' + vid + ':' + analytics.todayKey();
+    if (!limit(k, 1, 1000 * 60 * 60 * 24)) {
+      try { analytics.event({ vid, kind: 'open', ua }); } catch (e) {}
+    }
+  }
   if (vid) {
     const prev = LIVE.get(vid);
     LIVE.set(vid, {
@@ -1339,6 +1405,9 @@ function normImages(list) {
   return list.map((x) => (typeof x === 'string' ? { url: x, thumb: '' } : { url: clean(x.url, 400), thumb: clean(x.thumb, 400) })).filter((x) => x.url).slice(0, 30);
 }
 
+/* One dress, many collections: the dress is stored ONCE (with one id, one set
+   of photos, one view count) and the other collections simply point at the
+   same id. `extra` holds the collection ids that also show it.             */
 app.post('/api/admin/collections/:cid/items', auth.requireAuth, (req, res) => {
   const b = req.body || {};
   const name = clean(b.name, 160).trim();
@@ -1352,14 +1421,60 @@ app.post('/api/admin/collections/:cid/items', auth.requireAuth, (req, res) => {
     order: 0, views: 0, tags: Array.isArray(b.tags) ? b.tags.map((t) => clean(t, 30)) : [],
     createdAt: new Date().toISOString()
   };
+  let extra = [];
   store.update((db) => {
     const c = (db.collections || []).find((x) => x.id === req.params.cid);
     if (!c) return;
     c.items = c.items || [];
     item.order = c.items.length + 1;
     c.items.push(item);
+    /* same dress, additional collections */
+    const wanted = Array.isArray(b.extraCollections) ? b.extraCollections : [];
+    wanted.forEach((id) => {
+      if (!id || id === req.params.cid) return;
+      const o = (db.collections || []).find((x) => x.id === id);
+      if (!o) return;
+      o.items = o.items || [];
+      if (o.items.some((x) => x.id === item.id)) return;
+      o.items.push(Object.assign({}, item, { order: o.items.length + 1, extra: [] }));
+      extra.push(o.id);
+    });
+    item.extra = extra;
   });
-  res.json({ ok: true, item });
+  res.json({ ok: true, item, extra });
+});
+
+/* list every collection that shows this dress (opening / removing it later) */
+app.get('/api/admin/items/:iid/collections', auth.requireAuth, (req, res) => {
+  const db = store.get();
+  const ids = (db.collections || []).filter((c) => (c.items || []).some((x) => x.id === req.params.iid)).map((c) => c.id);
+  res.json({ ok: true, collections: ids });
+});
+
+/* put an existing dress into another collection (or take it out again) */
+app.post('/api/admin/collections/:cid/items/:iid/link', auth.requireAuth, (req, res) => {
+  const on = !(req.body && req.body.on === false);
+  let state = null;
+  store.update((db) => {
+    const src = (db.collections || []).find((c) => (c.items || []).some((x) => x.id === req.params.iid));
+    const target = (db.collections || []).find((x) => x.id === req.params.cid);
+    if (!src || !target) return;
+    target.items = target.items || [];
+    const there = target.items.some((x) => x.id === req.params.iid);
+    if (on && !there) {
+      if (src.id === target.id) return;
+      const copy = src.items.find((x) => x.id === req.params.iid);
+      target.items.push(Object.assign({}, copy, { order: target.items.length + 1 }));
+      state = 'added';
+    } else if (!on && there && src.id !== target.id) {
+      target.items = target.items.filter((x) => x.id !== req.params.iid);
+      state = 'removed';
+    }
+    const base = src.items.find((x) => x.id === req.params.iid);
+    if (base) base.extra = (db.collections || []).filter((c) => c.id !== src.id && (c.items || []).some((x) => x.id === req.params.iid)).map((c) => c.id);
+  });
+  if (!state) return res.status(400).json({ ok: false, error: 'Could not change that collection.' });
+  res.json({ ok: true, state });
 });
 
 app.put('/api/admin/collections/:cid/items/:iid', auth.requireAuth, (req, res) => {
@@ -1368,6 +1483,18 @@ app.put('/api/admin/collections/:cid/items/:iid', auth.requireAuth, (req, res) =
     const c = (db.collections || []).find((x) => x.id === req.params.cid);
     const it = c && (c.items || []).find((x) => x.id === req.params.iid);
     if (!it) return;
+    /* one dress, many collections: an edit here is an edit everywhere */
+    const mirror = () => {
+      (db.collections || []).forEach((o) => {
+        if (o.id === (c && c.id)) return;
+        (o.items || []).forEach((x) => {
+          if (x.id !== it.id) return;
+          ['name', 'price', 'desc', 'images', 'thumbs', 'video', 'tags'].forEach((k) => {
+            if (it[k] !== undefined) x[k] = JSON.parse(JSON.stringify(it[k]));
+          });
+        });
+      });
+    };
     if (b.name !== undefined) it.name = clean(b.name, 160);
     if (b.price !== undefined) it.price = num(b.price);
     if (b.desc !== undefined) it.desc = clean(b.desc, 1200);
@@ -1379,6 +1506,7 @@ app.put('/api/admin/collections/:cid/items/:iid', auth.requireAuth, (req, res) =
     if (b.video !== undefined) it.video = clean(b.video, 300);
     if (b.order !== undefined) it.order = num(b.order);
     if (Array.isArray(b.tags)) it.tags = b.tags.map((t) => clean(t, 30));
+    mirror();
   });
   res.json({ ok: true });
 });
@@ -1398,12 +1526,18 @@ app.put('/api/admin/collections/:cid/items', auth.requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+/* Delete = gone from every collection that showed it (it is one dress, not copies). */
 app.delete('/api/admin/collections/:cid/items/:iid', auth.requireAuth, (req, res) => {
+  let removedFrom = [];
   store.update((db) => {
-    const c = (db.collections || []).find((x) => x.id === req.params.cid);
-    if (c) c.items = (c.items || []).filter((x) => x.id !== req.params.iid);
+    (db.collections || []).forEach((c) => {
+      const had = (c.items || []).some((x) => x.id === req.params.iid);
+      if (!had) return;
+      c.items = c.items.filter((x) => x.id !== req.params.iid);
+      removedFrom.push(c.id);
+    });
   });
-  res.json({ ok: true });
+  res.json({ ok: true, removedFrom });
 });
 
 /* ------------------------- inbox housekeeping --------------------------- */
@@ -1708,6 +1842,67 @@ app.get('/api/owner/data', auth.requireOwner, (req, res) => {
   });
 });
 
+/* ------------------------------ analytics ------------------------------- */
+/* Owner only. `days` = 1..400, or ?from=YYYY-MM-DD&to=YYYY-MM-DD for custom. */
+/* owner-written pages (About / Terms / size guide…) — owner only */
+app.put('/api/owner/pages', auth.requireOwner, (req, res) => {
+  const list = Array.isArray((req.body || {}).pages) ? req.body.pages : null;
+  if (!list) return res.status(400).json({ ok: false, error: 'pages must be an array.' });
+  const slugify2 = (t) => String(t || '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'page';
+  const seen = new Set();
+  const cleaned = list.slice(0, 60).map((x, i) => {
+    let slug = clean(x.slug, 60).trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-|-$/g, '') || slugify2(x.title);
+    while (seen.has(slug)) slug = slug + '-' + (i + 1);
+    seen.add(slug);
+    return {
+      id: clean(x.id, 40) || store.uid('pg'),
+      slug,
+      title: clean(x.title, 90).trim() || 'Untitled',
+      summary: clean(x.summary, 200),
+      body: clean(x.body, 12000),
+      images: Array.isArray(x.images) ? x.images.filter((u) => typeof u === 'string' && u.startsWith('/')).slice(0, 12) : [],
+      enabled: x.enabled !== false,
+      showInMenu: x.showInMenu !== false,
+      inSitemap: x.inSitemap !== false,
+      order: Number(x.order) || i + 1,
+      updatedAt: new Date().toISOString()
+    };
+  });
+  store.update((db) => { db.settings = db.settings || {}; db.settings.pages = cleaned; });
+  res.json({ ok: true, pages: cleaned });
+});
+
+app.get('/api/owner/analytics', auth.requireOwner, (req, res) => {
+  const q = req.query || {};
+  const opts = { days: q.days, from: q.from, to: q.to };
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(analytics.summary(opts));
+});
+
+app.get('/api/owner/analytics/visitors', auth.requireOwner, (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ ok: true, visitors: analytics.recentVisitors(req.query.limit) });
+});
+
+app.get('/api/owner/analytics.csv', auth.requireOwner, (req, res) => {
+  const q = req.query || {};
+  const body = analytics.csv({ days: q.days, from: q.from, to: q.to });
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="znz-analytics-' + analytics.todayKey() + '.csv"');
+  res.send(body);
+});
+
+/* the shop tells us the client installed the app / opened it as an app */
+app.post('/api/track/app', (req, res) => {
+  const b = req.body || {};
+  const kind = clean(b.kind, 12);
+  const vid = visitorId(req) || '';
+  if (kind && limit('apptrack' + ip(req), 40, 60000)) {
+    analytics.event({ vid, kind, ua: req.headers['user-agent'] });
+  }
+  res.json({ ok: true });
+});
+
 /* ---------------------------- SEO + pages ------------------------------- */
 let indexHtml = null;
 let indexMtime = 0;
@@ -1723,6 +1918,42 @@ function getIndex() {
   return indexHtml;
 }
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* Product structured data → Google can show name, price and availability */
+function productLd(db, c, it, host) {
+  const imgs = (it.images || []).filter(Boolean).map((u) => (/^https?:/i.test(u) ? u : host + u));
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: it.name,
+    description: (it.desc || `${it.name} from the Z&Z ${c.name} collection — hand-embroidered, made to measure.`).slice(0, 900),
+    image: imgs.slice(0, 6),
+    sku: it.id,
+    brand: { '@type': 'Brand', name: (db.settings && db.settings.brand && db.settings.brand.name) || 'Z&Z' },
+    category: c.name,
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'PKR',
+      price: Number(it.price) || 0,
+      availability: 'https://schema.org/InStock',
+      url: host + '/d/' + c.id + '/' + it.id,
+      seller: { '@type': 'Organization', name: 'Z&Z' }
+    }
+  };
+}
+
+/* Breadcrumbs (Home → Collection → Dress) */
+function crumbsLd(c, it, host) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: host + '/' },
+      { '@type': 'ListItem', position: 2, name: c.name, item: host + '/c/' + c.id },
+      ...(it ? [{ '@type': 'ListItem', position: 3, name: it.name, item: host + '/d/' + c.id + '/' + it.id }] : [])
+    ]
+  };
+}
 
 function jsonLd(db, canonical) {
   const s = db.settings || {};
@@ -1763,7 +1994,7 @@ function jsonLd(db, canonical) {
   return JSON.stringify([org, site]).replace(/</g, '\\u003c');
 }
 
-function renderIndex({ title, description, ogImage, canonical }) {
+function renderIndex({ title, description, ogImage, canonical, noindex, extraLd }) {
   let html = getIndex();
   const db = store.get();
   const seo = db.settings.seo || {};
@@ -1776,35 +2007,66 @@ function renderIndex({ title, description, ogImage, canonical }) {
     .replace(/__OG_IMAGE__/g, esc(ogImage || (db.settings.hero && db.settings.hero.posters && db.settings.hero.posters[0] ? db.settings.hero.posters[0].url : '/assets/img/posters/poster-1.webp')))
     .replace(/__CANONICAL__/g, esc(canonical || '/'))
     .replace(/__KEYWORDS__/g, esc(seo.keywords || 'bridal dresses, luxury bridal wear'))
+    .replace('__ROBOTS__', noindex ? 'noindex,follow' : 'index,follow,max-image-preview:large')
+    .replace('__EXTRA_LD__', (extraLd && extraLd.length)
+      ? extraLd.map((o) => '<script type="application/ld+json">' + JSON.stringify(o).replace(/</g, '\\u003c') + '</script>').join('\n')
+      : '')
     .replace(/__V__/g, assetVersion());
   return html;
 }
 
+/* gzip cache for the HTML pages: identical ETag → Render's CDN answers 304
+   and a repeat visitor downloads almost nothing. */
+const HTML_GZ = new Map();
+function sendHtml(req, res, html, key) {
+  res.type('html');
+  if (!/\bgzip\b/.test(req.headers['accept-encoding'] || '')) return res.send(html);
+  const ck = key + '|' + html.length;
+  let hit = HTML_GZ.get(ck);
+  if (!hit) {
+    hit = zlib.gzipSync(Buffer.from(html), { level: 9 });
+    if (HTML_GZ.size > 400) HTML_GZ.clear();
+    HTML_GZ.set(ck, hit);
+  }
+  const etag = 'W/"' + hit.length.toString(16) + '-' + html.length.toString(16) + '"';
+  res.setHeader('ETag', etag);
+  res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+  /* repeat visitor / crawling bot: nothing to download at all */
+  if (req.headers['if-none-match'] === etag) { res.statusCode = 304; return res.end(); }
+  res.setHeader('Content-Encoding', 'gzip');
+  res.setHeader('Vary', 'Accept-Encoding');
+  res.end(hit);
+}
+
 app.get(['/', '/welcome', '/shop', '/about'], (req, res) => {
-  res.type('html').send(renderIndex({ canonical: '/' }));
+  sendHtml(req, res, renderIndex({ canonical: '/' }), '/');
 });
 
+/* unknown /c/… or /d/… = a real 404 for Google (no soft 404 pages) */
 app.get('/c/:slug', (req, res) => {
   const db = store.get();
   const c = (db.collections || []).find((x) => x.id === req.params.slug);
-  if (!c) return res.status(404).type('html').send(renderIndex({ title: 'Collection not found — Z&Z' }));
-  res.type('html').send(renderIndex({
+  if (!c || c.enabled === false) return res.status(404).type('html').send(renderIndex({ title: 'Collection not found — Z&Z', canonical: req.path, noindex: true }));
+  return sendHtml(req, res, renderIndex({
+    extraLd: [crumbsLd(c, null, 'https://' + (req.get('host') || 'znz.onrender.com'))],
     title: `${c.name} — Z&Z Luxury Bridal Collection`,
     description: `${c.name} by Z&Z. ${c.description || 'Hand-embroidered luxury bridal couture with nationwide delivery.'}`,
     ogImage: c.image, canonical: `/c/${c.id}`
-  }));
+  }), req.path);
 });
 
 app.get('/d/:cid/:iid', (req, res) => {
   const db = store.get();
   const c = (db.collections || []).find((x) => x.id === req.params.cid);
   const it = c && (c.items || []).find((x) => x.id === req.params.iid);
-  if (!it) return res.status(404).type('html').send(renderIndex({ title: 'Not found — Z&Z' }));
-  res.type('html').send(renderIndex({
+  if (!it) return res.status(404).type('html').send(renderIndex({ title: 'Not found — Z&Z', canonical: req.path, noindex: true }));
+  const host4 = 'https://' + (req.get('host') || 'znz.onrender.com');
+  return sendHtml(req, res, renderIndex({
+    extraLd: [productLd(store.get(), c, it, host4), crumbsLd(c, it, host4)],
     title: `${it.name} — ${c.name} | Z&Z`,
     description: (it.desc || `${it.name} from the Z&Z ${c.name} collection.`).slice(0, 300),
     ogImage: (it.images || [])[0], canonical: `/d/${c.id}/${it.id}`
-  }));
+  }), req.path);
 });
 
 /* panels: inject the same asset stamp so their css/js is cached for a year */
@@ -1819,6 +2081,15 @@ app.get('/robots.txt', (req, res) => {
   res.type('text/plain').send(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: ${(req.protocol + '://' + req.get('host'))}/sitemap.xml\n`);
 });
 
+/* one custom page as JSON (the shop renders it) */
+app.get('/api/page/:slug', (req, res) => {
+  const db = store.get();
+  const pg = ((db.settings && db.settings.pages) || []).find((x) => x.slug === req.params.slug && x.enabled !== false);
+  if (!pg) return res.status(404).json({ ok: false, error: 'Page not found.' });
+  res.set('Cache-Control', 'no-store');
+  res.json({ ok: true, page: { slug: pg.slug, title: pg.title, summary: pg.summary || '', body: pg.body || '', images: pg.images || [] } });
+});
+
 app.get('/sitemap.xml', (req, res) => {
   const db = store.get();
   const base = req.protocol + '://' + req.get('host');
@@ -1827,11 +2098,29 @@ app.get('/sitemap.xml', (req, res) => {
     urls.push(`${base}/c/${c.id}`);
     (c.items || []).forEach((it) => urls.push(`${base}/d/${c.id}/${it.id}`));
   });
+  ((db.settings && db.settings.pages) || []).filter((x) => x.enabled !== false && x.slug).forEach((x) => {
+    if (x.inSitemap !== false) urls.push(`${base}/p/${x.slug}`);
+  });
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-    urls.map((u) => `  <url><loc>${esc(u)}</loc><changefreq>weekly</changefreq><priority>${u === base + '/' ? '1.0' : '0.8'}</priority></url>`).join('\n') +
+    urls.map((u) => `  <url><loc>${esc(u)}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod><changefreq>weekly</changefreq><priority>${u === base + '/' ? '1.0' : u.includes('/d/') ? '0.7' : '0.8'}</priority></url>`).join('\n') +
     `\n</urlset>`
   );
+});
+
+/* Custom pages the owner writes in the panel (About Us, Terms, Size guide…) —
+   real URLs, so they can be indexed by Google and linked from the menu. */
+app.get('/p/:slug', (req, res) => {
+  const db = store.get();
+  const list = (db.settings && db.settings.pages) || [];
+  const pg = list.find((x) => x.slug === req.params.slug && x.enabled !== false);
+  if (!pg) return res.status(404).type('html').send(renderIndex({ title: 'Page not found — Z&Z' }));
+  const firstImg = ((pg.images || [])[0]) || null;
+  return sendHtml(req, res, renderIndex({
+    title: `${pg.title} — Z&Z`,
+    description: (pg.body || '').replace(/\s+/g, ' ').slice(0, 300) || `${pg.title} — Z&Z luxury bridal couture.`,
+    ogImage: firstImg, canonical: `/p/${pg.slug}`
+  }), req.path);
 });
 
 /* manifest is generated from settings (name / icons follow admin branding) */
@@ -2057,6 +2346,56 @@ function ensureDefaults() {
     }
   });
 
+  /* brand WhatsApp — the number clients write to for dress inquiries */
+  if (!S.contact) S.contact = {};
+  if (!S.contact.whatsapp) { S.contact.whatsapp = '03267600205'; changed = true; }
+  if (!S.contact.whatsappMessage) {
+    S.contact.whatsappMessage = 'Assalam o Alaikum Z&Z! I would like to inquire about your bridal collection.';
+    changed = true;
+  }
+  if (!S.contact.waMessages || typeof S.contact.waMessages !== 'object') {
+    S.contact.waMessages = {
+      general: 'Assalam o Alaikum Z&Z! I would like to inquire about your bridal collection.',
+      product: 'Assalam o Alaikum Z&Z! I am interested in this dress: {name} ({link})',
+      collection: 'Assalam o Alaikum Z&Z! Please share more designs from your {collection} collection. ({link})',
+      order: 'Assalam o Alaikum Z&Z! I would like to place an order: {items}',
+      contact: 'Assalam o Alaikum Z&Z! I have a question about your dresses.'
+    };
+    changed = true;
+  }
+
+  /* footer credit (developer line + WhatsApp) */
+  if (!S.credit || typeof S.credit !== 'object') {
+    S.credit = {
+      enabled: true,
+      text: 'Crafted by Cunix Web Developers',
+      phone: '0305 6874078',
+      whatsapp: '923056874078',
+      message: 'Hello! I want to make a website like this one.',
+      showNumber: true
+    };
+    changed = true;
+  }
+
+  /* owner-written pages (About Us, Terms, size guide…) — start with the two
+     everyone needs, already written, so the footer is never empty. */
+  if (!Array.isArray(S.pages) || !S.pages.length) {
+    S.pages = [{
+      slug: 'about-us',
+      title: 'About Us',
+      summary: 'The story behind Z&Z — hand embroidery, made-to-measure couture and nationwide delivery.',
+      body: 'Z&Z is a luxury bridal and formal couture house from Pakistan. Every piece is hand embroidered by our own karigars and stitched to your measurements, so the dress that reaches you is yours alone.\n\nFrom the first sketch to the final fitting we work closely with every bride: barat lehengas, walima gowns, mehndi and party formals. We deliver across Pakistan and to Pakistanis abroad.\n\nWrite to us on WhatsApp any time — we usually reply within a few hours.',
+      images: [], enabled: true, showInMenu: true, inSitemap: true, order: 1, updatedAt: new Date().toISOString()
+    }, {
+      slug: 'terms-and-conditions',
+      title: 'Terms & Conditions',
+      summary: 'Orders, measurements, delivery time and our exchange policy.',
+      body: 'Orders\nEvery dress is made to measure after the order is confirmed, and a 50% advance is required to start work.\n\nMeasurements\nOur team guides you through the measurements on WhatsApp. Please give them carefully; small adjustments are free of charge.\n\nDelivery\nStitching takes 4 to 6 weeks. Delivery inside Pakistan is 2 to 4 working days after completion; international delivery takes 7 to 12 days.\n\nExchange\nBecause every dress is made for one person, ready pieces can be exchanged within 7 days if unworn and unaltered. Custom orders cannot be returned, but we will always help with fitting adjustments.\n\nColours\nPhotographs are taken in natural light; a slight difference in shade is possible between screens.',
+      images: [], enabled: true, showInMenu: true, inSitemap: true, order: 2, updatedAt: new Date().toISOString()
+    }];
+    changed = true;
+  }
+
   /* owner-run advertising slots */
   if (!S.ads) {
     S.ads = { enabled: true, items: [] };
@@ -2092,23 +2431,27 @@ function ensureDefaults() {
 }
 
 const ghsync = require('./lib/ghsync');
+const analytics = require('./lib/analytics');
 
-process.on('SIGINT', async () => { store.flush(); try { await ghsync.flush(); } catch (e) {} process.exit(0); });
-process.on('SIGTERM', async () => { store.flush(); try { await ghsync.flush(); } catch (e) {} process.exit(0); });
+process.on('SIGINT', async () => { store.flush(); try { await analytics.flush(); } catch (e) {} try { await ghsync.flush(); } catch (e) {} process.exit(0); });
+process.on('SIGTERM', async () => { store.flush(); try { await analytics.flush(); } catch (e) {} try { await ghsync.flush(); } catch (e) {} process.exit(0); });
 
 /* Boot: if GitHub storage is configured, pull the newest data + uploads first, then start. */
 (async () => {
   try { await ghsync.pullAll(); } catch (e) { console.error('[boot] github pull skipped:', e.message); }
   store.load();
   ensureDefaults();
+  try { analytics.pull(); } catch (e) {}
   precompress();
   ghsync.start();
+  /* make sure the compressed copies match this build (cheap: only changed files) */
+  try { require('./tools-minify').run(true).catch(() => {}); } catch (e) {}
   /* ---------------------------------------------------------------- build info */
 const BUILD = {
   name: 'Z&Z — Luxury Bridals & Formals',
-  version: '8.2.0',
-  build: '2026-10-26-r15',
-  features: ['try-on-studio', 'auto-cutout', '13-transitions', 'github-storage', 'backup-restore', 'browsing-badge', 'keep-awake', 'bg-bubbles', '4k-images', 'install-app', 'hidden-logins']
+  version: '8.4.0',
+  build: '2026-10-28-r17',
+  features: ['try-on-studio', 'auto-cutout', '13-transitions', 'github-storage', 'backup-restore', 'browsing-badge', 'keep-awake', 'bg-bubbles', '4k-images', 'install-app', 'hidden-logins', 'analytics', 'multi-collection', 'custom-pages', 'dev-credit', 'brand-whatsapp', 'super-fast', 'product-seo', 'lazy-tryon']
 };
 
 app.get('/api/version', (req, res) => {
@@ -2149,5 +2492,20 @@ app.listen(PORT, '0.0.0.0', () => {
     if (ghsync.enabled) console.log('GitHub storage: on — settings and uploads are saved to your repo');
     startKeepAwake();
     backfillUploadVariants();
+    /* warm the gzip HTML cache for the home page + every collection */
+    setTimeout(() => {
+      try {
+        const fake = { headers: { 'accept-encoding': 'gzip' }, query: {} };
+        const fakeRes = {
+          type() { return this; }, setHeader() { return this; }, end() { return this; }, send() { return this; }
+        };
+        const db = store.get();
+        (db.collections || []).forEach((c) => {
+          const html = renderIndex({ title: `${c.name} — Z&Z Luxury Bridal Collection`, canonical: `/c/${c.id}`, ogImage: c.image });
+          sendHtml(fake, fakeRes, html, '/c/' + c.id);
+        });
+        sendHtml(fake, fakeRes, renderIndex({ canonical: '/' }), '/');
+      } catch (e) { console.log('[warm] skipped:', e.message); }
+    }, 1500);
   });
 })();

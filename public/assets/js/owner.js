@@ -18,7 +18,7 @@
     collections: 'Collections', items: 'Dresses & prices', home: 'Home sections',
     looks: 'Try-on photos & backgrounds', inbox: 'All customer data', look: 'Try-on page setup',
     contact: 'Contact & social', pages: 'About / Terms / SEO', security: 'Owner security',
-    backup: 'Backup & restore'
+    backup: 'Backup & restore', analytics: 'Analytics — visitors & app', footer: 'Footer credit'
   };
 
   async function api(url, opts) {
@@ -41,6 +41,16 @@
     const s = $('#savedFlag'); s.textContent = 'Saved ✓'; s.classList.add('on');
     clearTimeout(s._t); s._t = setTimeout(() => s.classList.remove('on'), 1800);
   }
+  /* 03267600205 → 923267600205 (WhatsApp wants the country code, no zero) */
+  function waTest(raw) {
+    let d = String(raw || '03267600205').replace(/[^0-9]/g, '');
+    if (d.startsWith('00')) d = d.slice(2);
+    if (d.startsWith('92')) return d;
+    if (d.startsWith('0')) return '92' + d.slice(1);
+    if (d.length === 10) return '92' + d;
+    return d;
+  }
+
   function setPath(obj, path, val) {
     const parts = path.split('.'); let cur = obj;
     parts.forEach((p, i) => { if (i === parts.length - 1) cur[p] = val; else { if (typeof cur[p] !== 'object' || cur[p] === null) cur[p] = {}; cur = cur[p]; } });
@@ -132,7 +142,7 @@
       card.querySelectorAll('[data-set]').forEach((el) => {
         let v = el.type === 'checkbox' ? el.checked : el.value;
         if (el.dataset.type === 'num') v = Number(String(v).replace(/[^\d.\-]/g, '')) || 0;
-        if (el.dataset.type === 'bool') v = !!v;
+        if (el.dataset.type === 'bool') v = (v === true || v === '1' || v === 'true' || v === 'on');
         setPath(patch, el.dataset.set, v);
       });
       save.disabled = true;
@@ -196,6 +206,305 @@
   const VIEWS = {};
   const BIND = {};
 
+  /* ------------------------------- analytics ------------------------------- */
+  const AN = { range: 30, from: '', to: '', data: null, busy: false };
+
+  function anQuery() {
+    if (AN.range === 'custom' && AN.from && AN.to) return 'from=' + AN.from + '&to=' + AN.to;
+    return 'days=' + encodeURIComponent(AN.range);
+  }
+
+  function anNum(n) {
+    const v = Number(n) || 0;
+    return v.toLocaleString('en-US');
+  }
+
+  function anDate(d) {
+    try { return new Date(d).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+    catch (e) { return d; }
+  }
+
+  function anBars(rows) {
+    if (!rows.length) return '<div class="an-empty">Is arse me koi data nahi.</div>';
+    const max = Math.max(1, ...rows.map((r) => Math.max(r.views, r.visitors)));
+    return `<div class="an-bars">${rows.map((r) => {
+      const hv = Math.round((r.views / max) * 100);
+      const hu = Math.round((r.visitors / max) * 100);
+      const showU = r.visitors > 0, showV = r.views > 0;
+      return `<div class="col" title="${r.day} · ${r.visitors} log · ${r.views} page views">
+        <em>${r.views}</em>
+        ${showU ? `<i class="v2" style="height:${Math.max(hu, 3)}%"></i>` : ''}
+        ${showV ? `<i style="height:${Math.max(hv, 3)}%"></i>` : ''}
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  function anLast7(rows) {
+    const last = rows.slice(-7);
+    const v = last.reduce((n, r) => n + (r.views || 0), 0);
+    const u = last.reduce((n, r) => n + (r.visitors || 0), 0);
+    if (!v && !u) return 'Pichle 7 din me koi visitor nahi';
+    return 'Pichle 7 din: ' + u.toLocaleString('en-US') + ' log · ' + v.toLocaleString('en-US') + ' page views';
+  }
+
+  function anHours(list) {
+    const max = Math.max(1, ...list);
+    return `<div class="an-hours">${list.map((n, i) =>
+      `<div class="h" title="${i}:00 — ${n} views"><i style="height:${Math.round((n / max) * 100)}%"></i></div>`).join('')}</div>
+      <div class="an-hours-x"><span>12 am</span><span>6 am</span><span>12 pm</span><span>6 pm</span><span>11 pm</span></div>`;
+  }
+
+  VIEWS.analytics = () => {
+    const d = AN.data;
+    const t = d ? d.totals : null;
+    const life = d ? d.lifetime : { installs: 0, opens: 0, daysTracked: 0 };
+    return `
+    <div class="an-wrap">
+      <div class="card owner-card">
+        <h2>Analytics — kitne log aaye, kitne ne app download ki</h2>
+        <p class="hint">Har visitor ka sirf ek chhota sa anonymous record rakha jata hai (device, page, waqt).
+        Naam, number ya email kuch nahi. Ye data GitHub par mehfooz rehta hai, is liye restart par bhi nahi jata.</p>
+
+        <div class="an-top" style="margin-top:12px">
+          <div class="an-tabs" id="anTabs">
+            ${[['7', 'Last 7 days'], ['30', 'Last 30 days'], ['90', 'Last 90 days'], ['365', 'Annual (365)'], ['custom', 'Custom dates']]
+              .map(([v, l]) => `<button data-an="${v}" class="${String(AN.range) === v ? 'on' : ''}">${l}</button>`).join('')}
+          </div>
+          <div class="an-custom">
+            <a class="btn sm" href="/api/owner/analytics.csv?${anQuery()}">Download CSV</a>
+            <button class="btn sm" id="anRefresh">Refresh</button>
+          </div>
+        </div>
+
+        <div class="an-custom" id="anCustomBox" style="margin-top:10px;${AN.range === 'custom' ? '' : 'display:none'}">
+          <label>From</label><input type="date" id="anFrom" value="${esc(AN.from)}">
+          <label>To</label><input type="date" id="anTo" value="${esc(AN.to)}">
+          <button class="btn sm gold" id="anApply">Apply</button>
+        </div>
+
+        ${AN.busy || !d ? '<div class="an-empty">Loading…</div>' : `
+        <div class="an-cards" style="margin-top:16px">
+          <div class="an-card hero"><span>Visitors — ${esc(d.range.from)} → ${esc(d.range.to)}</span>
+            <b>${anNum(t.visitors)}</b>
+            <small>${anNum(t.uniqueVisitors)} unique · avg ${t.avgPerDay} page views per day<br>${anLast7(d.rows)}</small></div>
+          <div class="an-card"><span>Page views</span><b>${anNum(t.views)}</b><small>${d.range.days} din ka total</small></div>
+          <div class="an-card gold"><span>App installs</span><b>${anNum(t.installs)}</b>
+            <small>${anNum(t.opens)} baar app kholi gayi · ${anNum(t.prompt)} install button clicks</small></div>
+          <div class="an-card"><span>iPhone steps dekhe</span><b>${anNum(t.steps)}</b><small>jinhon ne "Add to Home Screen" parha</small></div>
+          <div class="an-card"><span>Mobile / Desktop</span><b>${anNum(t.mobile)}<span style="font-size:13px;color:var(--ink-3)"> / ${anNum(t.desktop)}</span></b><small>${anNum(t.tablet)} tablet views</small></div>
+          <div class="an-card"><span>Lifetime app installs</span><b>${anNum(life.installs)}</b><small>${life.daysTracked} din ka record mehfooz</small></div>
+        </div>
+
+        <div class="an-chart" style="margin-top:16px">
+          <h3>Visitors &amp; page views — din ba din</h3>
+          <div class="an-legend"><span><i style="background:#6f9268"></i>Visitors</span><span><i style="background:#c9a54e"></i>Page views</span></div>
+          ${anBars(d.rows)}
+        </div>
+
+        <div class="row" style="gap:14px;margin-top:16px;align-items:flex-start">
+          <div class="an-chart" style="flex:1 1 320px">
+            <h3>Busiest hours</h3>
+            <div class="an-legend"><span>kis waqt log ziada aate hain</span></div>
+            ${anHours(d.hours)}
+          </div>
+          <div class="an-chart" style="flex:1 1 320px">
+            <h3>Top pages</h3>
+            ${d.topPages.length ? `<table class="an-table"><thead><tr><th>Page</th><th class="num">Views</th></tr></thead><tbody>
+              ${d.topPages.map((p2) => `<tr><td>${esc(p2.path)}</td><td class="num">${anNum(p2.views)}</td></tr>`).join('')}
+            </tbody></table>` : '<div class="an-empty">Abhi koi page view nahi.</div>'}
+          </div>
+        </div>
+
+        <div class="an-chart" style="margin-top:16px">
+          <h3>App installs — taza</h3>
+          ${d.installsRecent.length ? `<table class="an-table"><thead><tr><th>Kab</th><th>Device</th></tr></thead><tbody>
+            ${d.installsRecent.map((e) => `<tr><td>${esc(anDate(e.t))}</td><td>${esc(e.dev)}</td></tr>`).join('')}
+          </tbody></table>` : '<div class="an-empty">Abhi tak koi install record nahi. Jab koi client app add karega, yahan nazar aayega.</div>'}
+        </div>
+
+        <div class="an-chart" style="margin-top:16px">
+          <h3>Din ba din tafseel</h3>
+          <table class="an-table"><thead><tr>
+            <th>Date</th><th class="num">Visitors</th><th class="num">Views</th><th class="num">Installs</th><th class="num">App opens</th><th class="num">Mobile</th><th class="num">Desktop</th>
+          </tr></thead><tbody>
+            ${d.rows.slice().reverse().map((r) => `<tr>
+              <td>${esc(r.day)}</td><td class="num">${anNum(r.visitors)}</td><td class="num">${anNum(r.views)}</td>
+              <td class="num">${r.installs ? '<b>' + anNum(r.installs) + '</b>' : '—'}</td><td class="num">${r.opens ? anNum(r.opens) : '—'}</td>
+              <td class="num">${anNum(r.mobile)}</td><td class="num">${anNum(r.desktop)}</td>
+            </tr>`).join('')}
+          </tbody></table>
+          <p class="an-note" style="margin-top:10px">Note: counting isi update ke lagne ke din se shuru hoti hai — is se pehle ke visitors ka data kahin record nahi tha.
+          ${life.daysTracked ? 'File me ' + life.daysTracked + ' din ka record maujood hai.' : ''}</p>
+        </div>`}
+      </div>
+    </div>`;
+  };
+
+  BIND.analytics = () => {
+    const load = async () => {
+      AN.busy = true;
+      $('#tabBody').innerHTML = VIEWS.analytics();
+      BIND.analytics();
+      const r = await api('/api/owner/analytics?' + anQuery());
+      AN.busy = false;
+      AN.data = r && r.ok ? r : null;
+      $('#tabBody').innerHTML = VIEWS.analytics();
+      BIND.analytics();
+    };
+    $$('#anTabs button').forEach((b) => (b.onclick = () => {
+      AN.range = b.dataset.an;
+      if (AN.range === 'custom') {
+        const box = $('#anCustomBox');
+        if (box) box.style.display = 'flex';
+        $$('#anTabs button').forEach((x) => x.classList.toggle('on', x === b));
+        return;
+      }
+      load();
+    }));
+    const ap = $('#anApply');
+    if (ap) ap.onclick = () => {
+      const f = $('#anFrom').value, t2 = $('#anTo').value;
+      if (!f || !t2) return toast('Dono date chunein');
+      if (f > t2) return toast('From date, To se choti honi chahiye');
+      AN.from = f; AN.to = t2;
+      load();
+    };
+    const rf = $('#anRefresh');
+    if (rf) rf.onclick = () => load();
+    if (!AN.data && !AN.busy) load();
+  };
+
+  /* ----------------------------- footer credit ---------------------------- */
+  VIEWS.footer = () => {
+    const c = A.data.settings.credit || {};
+    return `
+    <div class="card owner-card">
+      <h2>Footer credit — Cunix Web Developers</h2>
+      <p class="hint">Website ke sab se neeche jo line aati hai woh yahan se badalti hai. Number par click karne se
+      client ka WhatsApp khul jata hai aur pehla message khud likha hota hai — client ko sirf <b>Send</b> dabana hota hai.</p>
+      <div class="row">
+        <label class="fld"><span>Credit line</span><input data-set="credit.text" value="${esc(c.text || 'Crafted by Cunix Web Developers')}" maxlength="80"></label>
+        <label class="fld"><span>Display number</span><input data-set="credit.phone" value="${esc(c.phone || '0305 6874078')}" maxlength="24"></label>
+      </div>
+      <div class="row">
+        <label class="fld"><span>WhatsApp number (92… , bina + ke)</span><input data-set="credit.whatsapp" value="${esc(c.whatsapp || '923056874078')}" maxlength="20"></label>
+        <label class="fld"><span>Pehla message jo client ko nazar aayega</span><input data-set="credit.message" value="${esc(c.message || 'Hello! I want to make a website like this one.')}" maxlength="200"></label>
+      </div>
+      <div class="row">
+        <label class="fld"><span>Footer me number dikhayein?</span>
+          <select data-set="credit.showNumber" data-type="bool"><option value="true" ${c.showNumber === false ? '' : 'selected'}>Haan</option><option value="false" ${c.showNumber === false ? 'selected' : ''}>Nahi</option></select></label>
+        <label class="fld"><span>Credit line dikhayein?</span>
+          <select data-set="credit.enabled" data-type="bool"><option value="true" ${c.enabled === false ? '' : 'selected'}>Haan</option><option value="false" ${c.enabled === false ? 'selected' : ''}>Nahi</option></select></label>
+      </div>
+      <p class="hint" style="margin-top:6px">Test link:
+        <a class="link-gold" target="_blank" rel="noopener" href="https://wa.me/${esc((c.whatsapp || '923056874078').replace(/[^0-9]/g, ''))}?text=${encodeURIComponent(c.message || 'Hello! I want to make a website like this one.')}">WhatsApp preview ↗</a></p>
+      ${saveBtn('Save credit line')}
+    </div>`;
+  };
+
+  /* --------------------------- brand WhatsApp ----------------------------- */
+  VIEWS.contactExtra = () => '';
+
+  /* ---------------------------- custom pages ------------------------------ */
+  let pageDraft = null;
+
+  function pageEditor(id) {
+    const list = A.data.settings.pages || [];
+    const pg = id ? list.find((x) => x.id === id || x.slug === id) : null;
+    pageDraft = pg ? JSON.parse(JSON.stringify(pg)) : {
+      id: 'pg' + Date.now().toString(36), slug: '', title: '', summary: '', body: '',
+      images: [], enabled: true, showInMenu: true, inSitemap: true, order: list.length + 1
+    };
+    const box = $('#pickModal');
+    box.hidden = false;
+    box.innerHTML = `<div class="box" style="max-width:640px">
+      <h2>${pg ? 'Edit page' : 'New page'}</h2>
+      <div class="row">
+        <label class="fld"><span>Page title *</span><input id="pgTitle" maxlength="90" value="${esc(pageDraft.title)}" placeholder="About Us"></label>
+        <label class="fld"><span>Link (URL) — khali chhorein to title se banega</span><input id="pgSlug" maxlength="60" value="${esc(pageDraft.slug)}" placeholder="about-us"></label>
+      </div>
+      <label class="fld"><span>Short summary (Google ke liye, 1–2 line)</span><input id="pgSum" maxlength="200" value="${esc(pageDraft.summary || '')}"></label>
+      <label class="fld"><span>Page ka matn (paragraph ke liye khali line chhorein)</span>
+        <textarea id="pgBody" style="min-height:190px" maxlength="12000">${esc(pageDraft.body || '')}</textarea></label>
+      <span style="font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3)">Photos (optional)</span>
+      <div class="drop" id="pgDrop" style="margin-top:6px">Click or drop photos</div>
+      <div class="thumbs" id="pgThumbs"></div>
+      <div class="row" style="margin-top:12px">
+        <label class="fld"><span>Menu me dikhayein?</span>
+          <select id="pgMenu"><option value="1" ${pageDraft.showInMenu !== false ? 'selected' : ''}>Haan</option><option value="0" ${pageDraft.showInMenu === false ? 'selected' : ''}>Nahi</option></select></label>
+        <label class="fld"><span>Google sitemap me?</span>
+          <select id="pgSite"><option value="1" ${pageDraft.inSitemap !== false ? 'selected' : ''}>Haan</option><option value="0" ${pageDraft.inSitemap === false ? 'selected' : ''}>Nahi</option></select></label>
+        <label class="fld"><span>Page chalu?</span>
+          <select id="pgOn"><option value="1" ${pageDraft.enabled !== false ? 'selected' : ''}>Haan</option><option value="0" ${pageDraft.enabled === false ? 'selected' : ''}>Nahi</option></select></label>
+      </div>
+      <div class="actions" style="margin-top:16px">
+        <button class="btn gold" id="pgSave">Save page</button>
+        <button class="btn" id="pgCancel">Cancel</button>
+      </div>
+    </div>`;
+
+    const paintImgs = () => {
+      const t = box.querySelector('#pgThumbs');
+      t.innerHTML = (pageDraft.images || []).length
+        ? pageDraft.images.map((u, i) => `<div class="thumb"><img src="${esc(u)}" alt=""><div class="bar"><button data-pdel="${i}">✕</button></div></div>`).join('')
+        : '<div class="empty" style="padding:10px">No photos.</div>';
+    };
+    paintImgs();
+    box.querySelector('#pgThumbs').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-pdel]');
+      if (!b) return;
+      pageDraft.images.splice(Number(b.dataset.pdel), 1);
+      paintImgs();
+    });
+    const drop = box.querySelector('#pgDrop');
+    drop.onclick = () => pickFile('other', async (files) => {
+      drop.textContent = 'Uploading…';
+      const up = await uploadFiles(files, 'other');
+      drop.textContent = 'Click or drop photos';
+      if (up.length) { pageDraft.images = (pageDraft.images || []).concat(up.map((u) => u.url)); paintImgs(); }
+    });
+
+    const close = () => { box.hidden = true; box.innerHTML = ''; };
+    box.querySelector('#pgCancel').onclick = close;
+    box.querySelector('#pgSave').onclick = async () => {
+      const title = box.querySelector('#pgTitle').value.trim();
+      if (!title) return toast('Title likhein');
+      const slug = (box.querySelector('#pgSlug').value.trim() || title)
+        .toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
+      pageDraft.title = title;
+      pageDraft.slug = slug;
+      pageDraft.summary = box.querySelector('#pgSum').value.trim();
+      pageDraft.body = box.querySelector('#pgBody').value;
+      pageDraft.showInMenu = box.querySelector('#pgMenu').value === '1';
+      pageDraft.inSitemap = box.querySelector('#pgSite').value === '1';
+      pageDraft.enabled = box.querySelector('#pgOn').value === '1';
+      pageDraft.updatedAt = new Date().toISOString();
+      const list = (A.data.settings.pages || []).slice();
+      const i = list.findIndex((x) => x.id === pageDraft.id);
+      if (i >= 0) list[i] = pageDraft; else list.push(pageDraft);
+      const res = await api('/api/owner/pages', { method: 'PUT', body: { pages: list } });
+      if (res.ok) { close(); await reload('pages'); flash(); toast('Page saved'); }
+      else toast(res.error || 'Could not save');
+    };
+  }
+
+  BIND.pages = () => {
+    const nw = $('#pgNew');
+    if (nw) nw.onclick = () => pageEditor(null);
+    onTab(async (e) => {
+      const ed = e.target.closest('[data-pgedit]');
+      if (ed) return pageEditor(ed.dataset.pgedit);
+      const del = e.target.closest('[data-pgdel]');
+      if (del) {
+        if (!confirm('Is page ko delete karein?')) return;
+        const list = (A.data.settings.pages || []).filter((x) => x.id !== del.dataset.pgdel);
+        const res = await api('/api/owner/pages', { method: 'PUT', body: { pages: list } });
+        if (res.ok) { await reload('pages'); toast('Page deleted'); }
+        else toast(res.error || 'Could not delete');
+      }
+    });
+  };
+
   /* ------------------------------- dashboard ------------------------------- */
   VIEWS.dashboard = () => {
     const s = A.data.stats;
@@ -209,6 +518,8 @@
         <div class="stat"><span>Live now</span><b id="liveBadge">—</b></div>
         <div class="stat"><span>Client photos</span><b>${s.looks}</b></div>
         <div class="stat"><span>Complaints</span><b>${s.complaints}</b></div>
+        <div class="stat"><span>Aaj ke visitors</span><b id="anTodayVisitors">—</b></div>
+        <div class="stat"><span>App installs</span><b id="anTodayInstalls">—</b></div>
       </div>
       <div class="card owner-card">
         <h2>Owner privileges</h2>
@@ -223,7 +534,8 @@
           <li>Customer ka poora data: orders, leads, complaints, ratings, photos</li>
         </ul>
         <div class="actions" style="margin-top:14px">
-          <button class="btn gold sm" data-goto="admin">Admin control</button>
+          <button class="btn gold sm" data-goto="analytics">Analytics</button>
+          <button class="btn sm" data-goto="admin">Admin control</button>
           <button class="btn sm" data-goto="wallpapers">Wallpapers</button>
           <button class="btn sm" data-goto="looks">Client photos</button>
         </div>
@@ -237,7 +549,16 @@
           </div>`).join('') : '<div class="empty">No orders yet.</div>'}
       </div>`;
   };
-  BIND.dashboard = () => { $$('[data-goto]').forEach((b) => (b.onclick = () => renderTab(b.dataset.goto))); };
+  BIND.dashboard = () => {
+    $$('[data-goto]').forEach((b) => (b.onclick = () => renderTab(b.dataset.goto)));
+    /* today's real numbers in the top cards */
+    api('/api/owner/analytics?days=1').then((r) => {
+      if (!r || !r.ok) return;
+      const a = $('#anTodayVisitors'), b2 = $('#anTodayInstalls');
+      if (a) a.textContent = (r.totals.visitors || 0).toLocaleString('en-US');
+      if (b2) b2.textContent = (r.totals.installs || 0).toLocaleString('en-US');
+    }).catch(() => {});
+  };
 
   /* ------------------------------ admin control ---------------------------- */
   VIEWS.admin = () => `
@@ -634,7 +955,7 @@
         ${items.length ? items.map((it, i) => `
           <div class="listrow item">
             <img class="sm" src="${esc((it.thumbs && it.thumbs[0]) || it.images[0] || '')}" alt="">
-            <div><h4>${esc(it.name)}</h4><p>${it.price ? 'Rs ' + Number(it.price).toLocaleString('en-US') : 'Contact for pricing'} · ${it.images.length} photos · ${it.views || 0} views</p></div>
+            <div><h4>${esc(it.name)}</h4><p>${it.price ? 'Rs ' + Number(it.price).toLocaleString('en-US') : 'Contact for pricing'} · ${it.images.length} photos · ${it.views || 0} views${colIdsOf(it.id).filter((x) => x !== col.id).length ? ' · <b style="color:var(--gold-2)">also in ' + colIdsOf(it.id).filter((x) => x !== col.id).map((x) => esc((A.data.collections.find((c) => c.id === x) || {}).name || x)).join(', ') + '</b>' : ''}</p></div>
             <div class="actions">
               <button class="btn sm" data-iup="${esc(it.id)}" ${i === 0 ? 'disabled' : ''}>↑</button>
               <button class="btn sm" data-idown="${esc(it.id)}" ${i === items.length - 1 ? 'disabled' : ''}>↓</button>
@@ -654,7 +975,10 @@
       const items = (col.items || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
       if (t.dataset.iedit) return itemEditor(t.dataset.iedit);
       if (t.dataset.idel) {
-        if (!confirm('Delete this dress?')) return;
+        const also = colIdsOf(t.dataset.idel).filter((x) => x !== col.id);
+        if (!confirm(also.length
+          ? 'Ye dress in collections me bhi hai: ' + also.map((x) => (A.data.collections.find((c) => c.id === x) || {}).name || x).join(', ') + '.\nHar jagah se delete karein?'
+          : 'Delete this dress?')) return;
         await api(`/api/admin/collections/${encodeURIComponent(col.id)}/items/${encodeURIComponent(t.dataset.idel)}`, { method: 'DELETE' });
         return reload('items');
       }
@@ -668,9 +992,13 @@
   };
 
   let draft = [];
+  function colIdsOf(itemId) {
+    return (A.data.collections || []).filter((c) => (c.items || []).some((x) => x.id === itemId)).map((c) => c.id);
+  }
   function itemEditor(itemId) {
     const col = A.data.collections.find((c) => c.id === A.itemsCol);
     const item = itemId ? (col.items || []).find((x) => x.id === itemId) : null;
+    const linked = itemId ? colIdsOf(itemId) : [];
     draft = item ? item.images.map((u, i) => ({ url: u, thumb: (item.thumbs || [])[i] || u })) : [];
     const box = $('#pickModal');
     box.hidden = false;
@@ -680,6 +1008,11 @@
       <div class="row">
         <label class="fld"><span>Price PKR (khaali = Contact for pricing)</span><input id="iPrice" type="number" min="0" step="500" value="${item && item.price ? item.price : ''}"></label>
         <label class="fld"><span>Description</span><textarea id="iDesc" maxlength="1000" style="min-height:70px">${esc(item ? item.desc : '')}</textarea></label>
+      </div>
+      <span style="font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);display:block;margin-top:14px">Aur kin collections me dikhe</span>
+      <p style="font-size:11px;color:var(--ink-3);margin:4px 0 8px">Ek hi dress — tasveerein aur price ek hi baar. Jis collection me bhi dikhani ho, tick kar dein (jaise ek article heavy party wear bhi hai aur bridal bhi).</p>
+      <div class="col-checks" id="iCols">
+        ${A.data.collections.map((c) => `<label class="col-check"><input type="checkbox" value="${esc(c.id)}" ${c.id === col.id || linked.includes(c.id) ? 'checked' : ''} ${c.id === col.id ? 'disabled' : ''}><span>${esc(c.name)}</span></label>`).join('')}
       </div>
       <span style="font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3)">Photos (first = cover)</span>
       <div class="drop" id="dropItem" style="margin-top:6px">Click or drop multiple photos</div>
@@ -747,8 +1080,16 @@
       const url = item
         ? `/api/admin/collections/${encodeURIComponent(col.id)}/items/${encodeURIComponent(item.id)}`
         : `/api/admin/collections/${encodeURIComponent(col.id)}/items`;
-      const res = await api(url, { method: item ? 'PUT' : 'POST', body: payload });
-      if (res.ok) { close(); await reload('items'); flash(); toast('Saved'); } else toast(res.error || 'Could not save');
+      const boxes = Array.from(box.querySelectorAll('#iCols input:checked')).map((i) => i.value);
+      const res = await api(url, { method: item ? 'PUT' : 'POST', body: Object.assign({}, payload, { extraCollections: boxes }) });
+      if (!res.ok) return toast(res.error || 'Could not save');
+      if (item) {
+        const before = colIdsOf(item.id);
+        const wanted = boxes.filter((id) => id !== col.id);
+        for (const cid of wanted) if (!before.includes(cid)) await api(`/api/admin/collections/${encodeURIComponent(cid)}/items/${encodeURIComponent(item.id)}/link`, { method: 'POST', body: { on: true } });
+        for (const cid of before) if (cid !== col.id && !wanted.includes(cid)) await api(`/api/admin/collections/${encodeURIComponent(cid)}/items/${encodeURIComponent(item.id)}/link`, { method: 'POST', body: { on: false } });
+      }
+      close(); await reload('items'); flash(); toast('Saved');
     };
   }
 
@@ -1154,12 +1495,25 @@
     const cur = A.data.settings.currency || {};
     return `
       <div class="card owner-card">
-        <h2>Contact</h2>
-        ${fld('WhatsApp number', 'contact.whatsapp', c.whatsapp, { placeholder: '923001234567' })}
-        ${fld('Phone', 'contact.phone', c.phone)}
+        <h2>WhatsApp — dress inquiries (brand number)</h2>
+        <p class="hint">Yeh woh number hai jo client dabein to seedha aap ke WhatsApp par chat khul jati hai.
+        Har button ka apna pehla message hota hai (dress ka naam + link khud aa jata hai).</p>
+        ${fld('WhatsApp number', 'contact.whatsapp', c.whatsapp, { placeholder: '03267600205' })}
+        ${fld('Phone (agar dikhana ho)', 'contact.phone', c.phone, { placeholder: '03267600205' })}
         ${fld('Email', 'contact.email', c.email)}
-        ${fld('Default WhatsApp message', 'contact.whatsappMessage', c.whatsappMessage, { type: 'textarea', max: 200 })}
         ${saveBtn()}
+      </div>
+      <div class="card owner-card">
+        <h2>WhatsApp ke pehle messages</h2>
+        <p class="hint">Client ko yeh message pehla se likha nazar aata hai — sirf Send dabana hota hai.
+        <b>{name}</b> = dress ka naam, <b>{link}</b> = us page ka link, <b>{collection}</b>, <b>{price}</b>, <b>{items}</b> khud bhar jate hain.</p>
+        ${fld('Dress inquiry (product page)', 'contact.waMessages.product', (c.waMessages || {}).product, { type: 'textarea', max: 200 })}
+        ${fld('Collection inquiry', 'contact.waMessages.collection', (c.waMessages || {}).collection, { type: 'textarea', max: 200 })}
+        ${fld('Order (cart / bag)', 'contact.waMessages.order', (c.waMessages || {}).order, { type: 'textarea', max: 200 })}
+        ${fld('Contact section ka message', 'contact.waMessages.contact', (c.waMessages || {}).contact, { type: 'textarea', max: 200 })}
+        ${fld('Default (agar kuch khali ho)', 'contact.whatsappMessage', c.whatsappMessage, { type: 'textarea', max: 200 })}
+        ${saveBtn('Save messages')}
+        <p class="hint" style="margin-top:8px">Test: <a class="link-gold" target="_blank" rel="noopener" href="https://wa.me/${esc(waTest(c.whatsapp))}?text=${encodeURIComponent((c.waMessages || {}).product || 'Assalam o Alaikum Z&Z!')}">WhatsApp preview ↗</a></p>
       </div>
       <div class="card">
         <h2>Social links</h2>
@@ -1193,6 +1547,24 @@
         ${fld('Text', 'terms.text', p.terms.text, { type: 'textarea', max: 2500 })}
         <div style="margin-top:8px">${imgBox(p.terms.image, 'terms', 'terms.image')}</div>
         ${saveBtn()}
+      </div>
+      <div class="card owner-card">
+        <h2>Custom pages</h2>
+        <p class="hint">About, Terms ke ilawa jitne pages chahein banayein (Size Guide, Delivery, Size chart…).
+        Har page ka apna link banta hai (jaise <b>/p/size-guide</b>), menu aur footer me khud aa jata hai, aur Google bhi index karta hai.</p>
+        <div class="actions" style="margin-bottom:10px"><button class="btn gold sm" id="pgNew">+ New page</button></div>
+        ${(p.pages || []).length ? (p.pages || []).slice().sort((a2, b2) => (a2.order || 0) - (b2.order || 0)).map((pg) => `
+          <div class="listrow">
+            <div>
+              <h4>${esc(pg.title)} ${pg.enabled === false ? '<span class="pill">off</span>' : ''}</h4>
+              <p>/p/${esc(pg.slug)} · ${pg.showInMenu === false ? 'menu me nahi' : 'menu me'} · ${pg.inSitemap === false ? 'sitemap me nahi' : 'sitemap me'} · ${new Date(pg.updatedAt || Date.now()).toLocaleDateString('en-GB')}</p>
+            </div>
+            <div class="actions">
+              <a class="btn sm" href="/p/${esc(pg.slug)}" target="_blank" rel="noopener">View</a>
+              <button class="btn sm" data-pgedit="${esc(pg.id)}">Edit</button>
+              <button class="btn sm danger" data-pgdel="${esc(pg.id)}">Delete</button>
+            </div>
+          </div>`).join('') : '<div class="empty">Abhi koi custom page nahi — About Us aur Terms already footer me hain.</div>'}
       </div>
       <div class="card">
         <h2>SEO</h2>

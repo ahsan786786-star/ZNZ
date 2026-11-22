@@ -1,0 +1,79 @@
+KAISE UPDATE KAREIN — ROUND 16 (8.3.0)
+=======================================
+
+Aap ke paas naya ZIP hai:  ZNZ-WEBSITE-FINAL-8.3.0.zip
+Isme poora folder hai. Purana folder GitHub se replace karna hai.
+Shuru karne se pehle: NAYA ZIP extract kar lein (right click ▸ Extract All).
+
+------------------------------------------------------------
+STEP 1 — Purani folder ka backup (1 minute)
+------------------------------------------------------------
+1. GitHub Desktop kholein
+2. Repository ▸ Show in Explorer
+   (aap ki folder: D:\ZNZ\New folder\ZNZ)
+3. Us folder ko copy kar ke ek jagah rakh dein (backup ke liye)
+
+------------------------------------------------------------
+STEP 2 — Sirf .git chhorein, baqi sab delete karein
+------------------------------------------------------------
+1. Usi folder (D:\ZNZ\New folder\ZNZ) me jayein
+2. View menu ▸ Hidden items par tick lagayein (taake .git nazar aaye)
+3. Ctrl + A se sab select karein
+4. Ctrl + dabaye rakhte hue **.git** par click karein (uska selection hat jayega)
+5. Delete dabayein — baqi sab chala jayega, .git mehfooz rahega
+   (Ye zaroori hai: purani settings/data naye code se mix na hon)
+
+------------------------------------------------------------
+STEP 3 — Naye ZIP ka material paste karein
+------------------------------------------------------------
+1. Naya ZIP extract karein → andar ek folder hoga: ZNZ-WEBSITE-FINAL-8.3.0
+2. Us folder ko kholein, Ctrl + A, Ctrl + C
+3. Wapas D:\ZNZ\New folder\ZNZ me aayein, Ctrl + V
+   (ab .git ke saath naya code, public, lib, data, package.json sab aa jayega)
+
+------------------------------------------------------------
+STEP 4 — GitHub Desktop se push
+------------------------------------------------------------
+1. GitHub Desktop kholein
+2. Changes me bohat si files dikhengi — yeh normal hai (naya version)
+3. Neeche message likhein:  round 16 analytics + multi collection + footer
+4. "Commit to main" dabayein
+5. Upar "Push origin" dabayein
+6. Agar "Pull origin" kahe to pehle Pull, phir Push
+
+------------------------------------------------------------
+STEP 5 — Render par deploy (khud ho jata hai)
+------------------------------------------------------------
+1. dashboard.render.com ▸ ZNZ ▸ Events
+2. Naya deploy chalega — 2 se 4 minute
+3. Status "Live" hone ka intezar karein
+
+------------------------------------------------------------
+STEP 6 — Tasdeeq (2 minute)
+------------------------------------------------------------
+1. https://znz.onrender.com/api/version kholein
+   → "version": "8.3.0" aur "build": "2026-10-27-r16" nazar aana chahiye
+2. https://znz.onrender.com/ kholein → page ke sab se neeche:
+   CRAFTED BY CUNIX WEB DEVELOPERS 0305 6874078 [WhatsApp]
+3. /owner me login karein → naya tab "Analytics — visitors & app" kholein
+4. /admin me login karein → Dresses & Prices → kisi dress par Edit →
+   "Also show in these collections" ke tick boxes nazar aayenge
+
+------------------------------------------------------------
+AGAR KUCH GHALAT LAGE
+------------------------------------------------------------
+GitHub Desktop me Commit se PEHLE:
+  Changes me agar .git ke ilawa sab kuch "Deleted" dikhe aur naya material nazar na aaye,
+  to "Discard changes" daba dein aur Step 2-3 dobara karein.
+
+Commit/Push ke BAAD kuch kharab lage to:
+  GitHub Desktop ▸ History ▸ purana commit ▸ right click ▸ Revert
+  (ya apni Step 1 wali backup folder wapas paste kar dein)
+
+------------------------------------------------------------
+YAAD RAHEIN
+------------------------------------------------------------
+* .git folder kabhi delete na karein — wohi GitHub ka rabta hai
+* data/db.json naye ZIP me purana (seed) data hai; GitHub storage on hone ki wajah se
+  Render boot par aap ka asli data khud pull kar leta hai — kuch nahi jata
+* Analytics ka data pehli baar GitHub par khud save ho jayega (data/analytics.json)

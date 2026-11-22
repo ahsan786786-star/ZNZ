@@ -5,8 +5,15 @@
      · pages + API  -> network first (always fresh prices / stock)
      · pictures, css, js, fonts -> cache first, refreshed in the background
 */
-const CACHE = 'znz-v14';
-const CORE = ['/', '/manifest.webmanifest'];
+const CACHE = 'znz-v17a';
+const CORE = [
+  '/',
+  '/manifest.webmanifest',
+  '/assets/css/app.min.css',
+  '/assets/js/welcome.min.js',
+  '/assets/js/app.min.js',
+  '/assets/img/logo-3d@2x.png'
+];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).catch(() => {}).then(() => self.skipWaiting()));

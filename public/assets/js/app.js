@@ -83,11 +83,42 @@
     if (d.startsWith('0')) return '92' + d.slice(1);
     return d;
   }
+  /* WhatsApp = the brand's own number. Every button opens a chat with a message
+     already written (dress name + link included), so the client just presses Send. */
   function waLink(text) {
-    const n = waNumber(S.data.contact.whatsapp);
+    const n = waNumber((S.data.contact || {}).whatsapp);
     if (!n) return '';
-    const msg = encodeURIComponent(text || S.data.contact.whatsappMessage || 'Hello Z&Z!');
+    const msg = encodeURIComponent(text || (S.data.contact || {}).whatsappMessage || 'Hello Z&Z!');
     return `https://wa.me/${n}?text=${msg}`;
+  }
+
+  /* fill {name} {link} {collection} {items} {price} in the owner's template */
+  function waMsg(kind, vars) {
+    const tpl = (((S.data.contact || {}).waMessages) || {})[kind]
+      || (kind === 'product' ? 'Assalam o Alaikum Z&Z! I am interested in this dress: {name} ({link})'
+        : kind === 'collection' ? 'Assalam o Alaikum Z&Z! Please share more designs from your {collection} collection. ({link})'
+        : kind === 'order' ? 'Assalam o Alaikum Z&Z! I would like to place an order: {items}'
+        : (S.data.contact || {}).whatsappMessage || 'Hello Z&Z!');
+    const v = vars || {};
+    return String(tpl)
+      .replace(/\{name\}/g, v.name || '')
+      .replace(/\{link\}/g, v.link || location.href)
+      .replace(/\{collection\}/g, v.collection || '')
+      .replace(/\{items\}/g, v.items || '')
+      .replace(/\{price\}/g, v.price || '');
+  }
+
+  /* absolute link of the page the client is looking at */
+  function hereLink() {
+    try { return location.origin + location.pathname; } catch (e) { return location.href; }
+  }
+
+  /* “I like this dress” chat: dress name + price + a link straight back to it */
+  function waProduct(item, col) {
+    if (!item) return waLink();
+    const link = location.origin + '/d/' + (col && col.id ? col.id : (item.collectionId || '')) + '/' + item.id;
+    const price = item.price ? ('Rs ' + Number(item.price).toLocaleString('en-US')) : 'price on request';
+    return waLink(waMsg('product', { name: item.name + ' — ' + price, link }));
   }
   function stars(n) {
     return `<span style="color:var(--gold);letter-spacing:.12em;font-size:12px">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>`;
@@ -116,8 +147,9 @@
     /* /x.webp → /x-md.webp (640 px) + /x.webp, so phones and slow connections pull ~70 % less */
     const big = /\.webp$/i.test(src) ? src.replace(/-sm\.webp$/i, '.webp') : src;
     const md = /\.webp$/i.test(src) ? big.replace(/\.webp$/i, '-md.webp') : '';
-    const set = md ? ` srcset="${esc(md)} 640w, ${esc(big)} 1024w" sizes="(max-width: 700px) 50vw, 300px"` : '';
-    return `<img src="${esc(md || src)}"${set} alt="${esc(alt)}" ${cls ? `class="${cls}"` : ''} loading="${eager ? 'eager' : 'lazy'}" decoding="async" ${eager ? 'fetchpriority="high"' : ''}>`;
+    const lg = /\.webp$/i.test(src) ? big.replace(/\.webp$/i, '-lg.webp') : '';
+    const srcset = md ? ` srcset="${esc(md)} 640w, ${esc(lg)} 1280w, ${esc(big)} 2000w" sizes="${eager ? '(max-width: 760px) 100vw, 620px' : '(max-width: 700px) 50vw, 300px'}"` : '';
+    return `<img src="${esc(md || src)}"${srcset} alt="${esc(alt)}" ${cls ? `class="${cls}"` : ''} loading="${eager ? 'eager' : 'lazy'}" decoding="async" ${eager ? 'fetchpriority="high"' : ''}>`;
   }
   function toast(msg) {
     const t = $('#toast');
@@ -224,9 +256,10 @@
         <li><a href="/#reviews" data-link>Rates &amp; Reviews</a></li>
         <li><button data-act="complaint">Complaint</button></li>
         ${vip.enabled ? `<li><button data-act="vip">Become our valuable customer</button></li>` : ''}
-        <li><a href="/#about" data-link>About Us</a></li>
+        ${customPages().filter((p2) => p2.showInMenu !== false).map((p2) => `<li><a href="/p/${esc(p2.slug)}" data-link>${esc(p2.title)}</a></li>`).join('')}
+        ${!customPages().some((p2) => p2.slug === 'about-us') ? '<li><a href="/#about" data-link>About Us</a></li>' : ''}
         <li><a href="/#contact" data-link>Contact Us</a></li>
-        <li><a href="/#terms" data-link>Terms &amp; Conditions</a></li>
+        ${!customPages().some((p2) => p2.slug === 'terms-and-conditions') ? '<li><a href="/#terms" data-link>Terms &amp; Conditions</a></li>' : ''}
       </ul>
       <div class="drawer-foot">
         ${(S.data.contact.phone ? `<div style="margin-bottom:6px">${esc(S.data.contact.phone)}</div>` : '')}
@@ -261,7 +294,7 @@
       fetch('/api/ping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: location.pathname || '/' }),
+        body: JSON.stringify({ path: location.pathname || '/', standalone: isStandalone() }),
         keepalive: true
       }).then((r) => r.json()).then((j) => { if (j && typeof j.live === 'number') paintLive(j.live); })
         .catch(() => {});
@@ -299,8 +332,22 @@
   });
   window.addEventListener('appinstalled', () => {
     installEvent = null;
+    trackApp('install');
     try { toast('App installed — the Z&Z icon is on your home screen.'); } catch (err) {}
   });
+
+  /* one small anonymous counter so the owner panel can show “kitne logon ne app
+     download ki” — no name, no number, nothing personal */
+  function trackApp(kind) {
+    try {
+      fetch('/api/track/app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind }),
+        keepalive: true
+      }).catch(() => {});
+    } catch (e) {}
+  }
 
   function isStandalone() {
     return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
@@ -352,6 +399,7 @@
         : ['In <b>Chrome / Edge</b>, click the install icon (⊕) in the address bar.',
            'Or open the browser menu → <b>“Install Z&Z…”</b>.',
            'Confirm — the shop opens in its own window like an app.'];
+    trackApp('steps');
     appModal('<h3>Get the Z&Z app</h3>'
       + '<p class="app-lead">The store installs straight from this page — no Play Store, no download, free, and always up to date.</p>'
       + '<ol class="app-steps">' + steps.map((t) => '<li>' + t + '</li>').join('') + '</ol>'
@@ -359,6 +407,7 @@
   }
 
   function askInstallApp() {
+    trackApp('prompt');
     if (isStandalone()) {
       appModal('<h3>You already have the app</h3><p class="app-lead">This page is running as the Z&Z app — open it any time from the Z&Z icon on your home screen.</p>');
       return;
@@ -539,12 +588,48 @@
   function route() {
     const path = location.pathname;
     closeWheel();
-    setTimeout(() => { try { mountFloatingAds(); ping(); } catch (e) {} }, 60);
+    setTimeout(() => { try { mountFloatingAds(); ping(); tuneImages(); } catch (e) {} }, 60);
     const parts = path.split('/').filter(Boolean);
+    if (parts[0] === 'p' && parts[1]) return renderPage(parts[1]);
     if (parts[0] === 'look') return renderLook();
     if (parts[0] === 'c' && parts[1]) return renderCollection(parts[1]);
     if (parts[0] === 'd' && parts[1] && parts[2]) return renderProduct(parts[1], parts[2]);
     return renderHome();
+  }
+
+  /* ------------------------------ custom page ----------------------------- */
+  function renderPage(slug) {
+    const pg = (S.data.pages || []).find((x) => x.slug === slug);
+    if (!pg) {
+      $('#view').innerHTML = `<div class="wrap sec"><div class="empty">This page is not available. <a class="link-gold" href="/" data-link>Back home</a></div></div>`;
+      bindLinks();
+      return;
+    }
+    fetch('/api/page/' + encodeURIComponent(slug)).then((r) => r.json()).then((j) => {
+      const page = (j && j.page) || {};
+      const body = String(page.body || '').split(/\n{2,}/).map((para) => `<p>${esc(para).replace(/\n/g, '<br>')}</p>`).join('');
+      const imgs = (page.images || []).filter(Boolean);
+      $('#view').innerHTML = `
+        <section class="sec page-wrap">
+          <div class="wrap" style="max-width:820px">
+            <nav class="crumb"><a href="/" data-link>Home</a> &nbsp;/&nbsp; ${esc(page.title || pg.title)}</nav>
+            <h1 class="page-title gold-text">${esc(page.title || pg.title)}</h1>
+            <div class="hr-orn"><span></span></div>
+            ${page.summary ? `<p class="page-lead">${esc(page.summary)}</p>` : ''}
+            ${imgs.length ? `<div class="page-imgs">${imgs.map((u) => `<img src="${esc(u)}" alt="${esc(page.title || '')}" loading="lazy" decoding="async">`).join('')}</div>` : ''}
+            <div class="page-body">${body || '<p>Details coming soon.</p>'}</div>
+            <div class="actions" style="margin-top:26px">
+              <a class="btn btn-gold" href="/#contact" data-link>Contact us</a>
+              <a class="btn" href="/" data-link>Continue shopping</a>
+            </div>
+          </div>
+        </section>`;
+      bindLinks();
+      document.title = (page.title || pg.title) + ' — Z&Z';
+    }).catch(() => {
+      $('#view').innerHTML = `<div class="wrap sec"><div class="empty">Could not load this page. <a class="link-gold" href="/" data-link>Back home</a></div></div>`;
+      bindLinks();
+    });
   }
 
   /* --------------------------------- home --------------------------------- */
@@ -569,7 +654,11 @@
           <div class="hero-track" id="heroTrack">
             ${posters.map((p, i) => `
               <div class="hero-slide">
-                ${imgTag(p.url, p.alt || 'Z&Z campaign poster', '', i === 0)}
+                <img src="${esc(p.url.replace(/\.webp$/i, '-lg.webp'))}"
+                     srcset="${esc(p.url.replace(/\.webp$/i, '-md.webp'))} 640w, ${esc(p.url.replace(/\.webp$/i, '-lg.webp'))} 1280w, ${esc(p.url)} 2000w"
+                     sizes="(max-width: 760px) 100vw, 760px"
+                     alt="${esc(p.alt || 'Z&Z campaign poster')}"
+                     loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" ${i === 0 ? 'fetchpriority="high"' : ''}>
               </div>`).join('')}
           </div>
           ${posters.length > 1 ? `
@@ -763,7 +852,7 @@
           <div class="hr-orn"><span></span></div>
           <p class="sec-sub">Message us on WhatsApp for sizing, fabric details, custom orders or a video call viewing.</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px">
-            ${waLink() ? `<a class="btn btn-gold wa-btn" href="${waLink()}" target="_blank" rel="noopener">${I.wa} WhatsApp us</a>` : ''}
+            ${waLink() ? `<a class="btn btn-gold wa-btn" href="${waLink(waMsg('contact'))}" target="_blank" rel="noopener">${I.wa} WhatsApp us${(S.data.contact || {}).whatsapp ? ' · ' + esc((S.data.contact || {}).whatsapp) : ''}</a>` : ''}
             ${c.phone ? `<a class="btn btn-ghost" href="tel:${esc(String(c.phone).replace(/[^\d+]/g, ''))}">${esc(c.phone)}</a>` : ''}
             ${c.email ? `<a class="btn btn-ghost" href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ''}
             <button class="btn btn-ghost" data-act="vip">Become a valuable customer</button>
@@ -1072,6 +1161,7 @@
       <div class="wrap">
         <div class="crumbs" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
           <span><a href="/" data-link>Home</a> &nbsp;/&nbsp; ${esc(col.name)}</span>
+          ${waLink() ? `<a class="btn btn-ghost sm wa-btn" href="${waLink(waMsg('collection', { collection: col.name, link: location.origin + '/c/' + col.id }))}" target="_blank" rel="noopener">${I.wa} Ask on WhatsApp</a>` : ''}
         </div>
         <section class="sec" style="padding-top:18px" id="collBody">
           ${items.length ? (layout === 'wheel' ? wheelMarkup(items.map((it) => ({ ...it, collectionId: col.id })), 'coll') : itemGrid(items.map((it) => ({ ...it, collectionId: col.id })))) : '<div class="empty">New pieces are being added to this collection. Please check back soon.</div>'}
@@ -1094,7 +1184,7 @@
     document.title = `${item.name} — ${col.name} | ${(S.data.brand || {}).name || 'Z&Z'}`;
     const imgs = (item.images || []).filter(Boolean);
     const first = imgs[0] || '';
-    const wa = waLink(`Hello Z&Z! I'm interested in "${item.name}" (${col.name}). Is it available?`);
+    const wa = waProduct(item, col);
     $('#view').innerHTML = `
       <div class="wrap">
         <div class="crumbs"><a href="/" data-link>Home</a> / <a href="/c/${esc(col.id)}" data-link>${esc(col.name)}</a> / ${esc(item.name)}</div>
@@ -1114,7 +1204,7 @@
               ${item.desc ? `<p class="desc">${esc(item.desc)}</p>` : ''}
               <div class="actions">
                 ${item.price ? `<button class="btn btn-gold" id="addCart">Add to bag</button>` : `<button class="btn btn-gold" id="askPrice">Contact for pricing</button>`}
-                ${wa ? `<a class="btn btn-ghost wa-btn" href="${wa}" target="_blank" rel="noopener">${I.wa} WhatsApp</a>` : ''}
+                ${wa ? `<a class="btn btn-ghost wa-btn" href="${waProduct(item, col)}" target="_blank" rel="noopener">${I.wa} Ask about this dress</a>` : ''}
               </div>
               <div class="trust">
                 <div>${I.check} Made to measure — share your size on WhatsApp</div>
@@ -1178,7 +1268,7 @@
   }
 
   function contactModalHTML(item, col) {
-    const wa = waLink(`Hello Z&Z! I would like the price of "${item.name}" (${col.name}).`);
+    const wa = waProduct(item, col);
     return `
       <h2>${esc(item.name)}</h2>
       <p style="color:var(--ink-2);font-size:13.5px;margin:8px 0 18px">Pricing for this piece is shared privately. Message us and our team will send you details, fabric options and delivery time.</p>
@@ -1245,6 +1335,22 @@
   }
 
   /* ------------------------------ try-on studio --------------------------- */
+  /* the try-on studio is a big script — load it only when that page is opened */
+  let tryonLoading = null;
+  function ensureTryon() {
+    if (window.ZZTryOn) return Promise.resolve();
+    if (tryonLoading) return tryonLoading;
+    tryonLoading = new Promise((resolve, reject) => {
+      const sc = document.createElement('script');
+      sc.src = '/assets/js/tryon.min.js' + (window.__ZZV ? '?v=' + window.__ZZV : '');
+      sc.defer = true;
+      sc.onload = () => resolve();
+      sc.onerror = () => { tryonLoading = null; reject(new Error('tryon')); };
+      document.head.appendChild(sc);
+    });
+    return tryonLoading;
+  }
+
   function renderLook() {
     const cfg = S.data.look || {};
     if (cfg.enabled === false) {
@@ -1269,7 +1375,10 @@
       </div>`;
     bindLinks();
     if (!window.ZZTryOn) {
-      $('#tryonRoot').innerHTML = '<div class="empty">The fitting room is loading. Please refresh.</div>';
+      $('#tryonRoot').innerHTML = '<div class="empty" style="padding:34px">Loading the fitting room…</div>';
+      ensureTryon().then(() => renderLook()).catch(() => {
+        $('#tryonRoot').innerHTML = '<div class="empty">The fitting room could not load. Please check your connection and refresh.</div>';
+      });
       return;
     }
     window.ZZTryOn.mount($('#tryonRoot'), {
@@ -1346,7 +1455,7 @@
             <button class="btn btn-gold btn-block" type="submit">Place order</button>
             <div class="form-msg" id="coOut"></div>
           </form>
-          ${waLink() ? `<a class="btn btn-ghost wa-btn btn-block" style="margin-top:8px" href="${waLink('Hello Z&Z! I want to order: ' + lines.map((l) => l.name + ' x' + l.qty).join(', '))}" target="_blank" rel="noopener">${I.wa} Order on WhatsApp</a>` : ''}
+          ${waLink() ? `<a class="btn btn-ghost wa-btn btn-block" style="margin-top:8px" href="${waLink(waMsg('order', { items: lines.map((l) => l.name + ' x' + l.qty).join(', ') }))}" target="_blank" rel="noopener">${I.wa} Order on WhatsApp</a>` : ''}
           <p class="cart-note">Prices shown in ${activeCur().code}. Final confirmation, delivery and payment details are shared on call/WhatsApp.</p>
         </div>` : ''}
       </aside>`;
@@ -1498,7 +1607,62 @@
     });
   }
 
+  /* floating WhatsApp chat button — always the brand's own number */
+  function mountWaFab() {
+    const href = waLink(waMsg('general'));
+    if (!href) return;
+    let fab = document.querySelector('.wa-fab');
+    if (!fab) {
+      fab = document.createElement('a');
+      fab.className = 'wa-fab';
+      fab.target = '_blank';
+      fab.rel = 'noopener';
+      fab.setAttribute('aria-label', 'Chat with us on WhatsApp');
+      fab.innerHTML = I.wa;
+      document.body.appendChild(fab);
+    }
+    fab.href = href;
+    fab.title = 'Chat with Z&Z on WhatsApp';
+  }
+
   /* -------------------------------- footer -------------------------------- */
+  /* a real /p/ page if the owner wrote one, otherwise the home-page section */
+  function pageLink(slug, label, fallback) {
+    const pg = ((S.data && S.data.pages) || []).find((x) => x.slug === slug);
+    return `<a class="fl" href="${pg ? '/p/' + esc(pg.slug) : fallback}" data-link>${label}</a>`;
+  }
+
+  /* owner-written pages that should also appear in the menu */
+  function customPages() {
+    return ((S.data && S.data.pages) || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+  }
+
+  /* “Crafted by …” line — opens WhatsApp with the developer's own number */
+  function creditHTML() {
+    const c = (S.data && S.data.credit) || {};
+    if (c.enabled === false) return '<span></span>';
+    const text = c.text || 'Crafted by Cunix Web Developers';
+    const num = (c.showNumber === false ? '' : (c.phone || ''));
+    const wa = waNumber(c.whatsapp || c.phone || '');
+    const msg = c.message || 'Hello! I want to make a website like this one.';
+    const href = wa ? `https://wa.me/${wa}?text=${encodeURIComponent(msg)}` : '';
+    const inner = `<b>${esc(text)}</b>${num ? ` <span class="credit-num">${esc(num)}</span>` : ''}`;
+    return href
+      ? `<a class="credit-line" href="${href}" target="_blank" rel="noopener" title="Chat on WhatsApp">${inner}<span class="credit-wa">WhatsApp</span></a>`
+      : `<span class="credit-line">${inner}</span>`;
+  }
+
+  /* 0305 6874078 → 923056874078 (WhatsApp wants the country code, no zero) */
+  function waNumber(raw) {
+    let d = String(raw || '').replace(/[^\d]/g, '');
+    if (!d) return '';
+    if (d.startsWith('00')) d = d.slice(2);
+    if (d.startsWith('92')) return d;
+    if (d.startsWith('0')) return '92' + d.slice(1);
+    if (d.length === 10) return '92' + d;
+    return d;
+  }
+
   function renderFooter() {
     const b = S.data.brand || {};
     const social = SOCIALS.filter(([k]) => (S.data.social || {})[k]);
@@ -1519,8 +1683,9 @@
           <div>
             <h4>Help</h4>
             <a class="fl" href="/#reviews" data-link>Rates &amp; Feedback</a>
-            <a class="fl" href="/#terms" data-link>Terms &amp; Conditions</a>
-            <a class="fl" href="/#about" data-link>About Us</a>
+            ${pageLink('about-us', 'About Us', '/#about')}
+            ${pageLink('terms-and-conditions', 'Terms &amp; Conditions', '/#terms')}
+            ${customPages().filter((p2) => !['about-us', 'terms-and-conditions'].includes(p2.slug)).map((p2) => `<a class="fl" href="/p/${esc(p2.slug)}" data-link>${esc(p2.title)}</a>`).join('')}
             <a class="fl" href="/#contact" data-link>Contact Us</a>
           </div>
           <div>
@@ -1530,7 +1695,7 @@
         </div>
         <div class="foot-bottom">
           <span>© ${new Date().getFullYear()} ${esc(b.name || 'Z&Z')} · All rights reserved</span>
-          <span>Crafted with love in Pakistan</span>
+          ${creditHTML()}
         </div>
       </div>`;
   }
@@ -1630,23 +1795,108 @@
   }
   function paint(res) {
     S.data = res.data;
+    try { document.documentElement.classList.add('data-ready'); } catch (e) {}
+    try {
+      const sc = document.querySelector('script[src*="app.min.js"], script[src*="app.js"]');
+      const m = sc && /[?&]v=([^&]+)/.exec(sc.getAttribute('src') || '');
+      if (m) window.__ZZV = m[1];
+    } catch (e) {}
     try { mountLivePill(); } catch (e) {}
     try { mountBgFx(); } catch (e) {}
     if (!curList().some((c) => c.code === S.currency)) S.currency = (curList()[0] || {}).code || 'PKR';
     applyTheme(); renderHeader(); renderDrawer(); renderFooter(); route();
   }
 
+  /* Timeout wrapper: on a very slow signal the cached shop still appears in
+     under a second instead of an empty screen. */
+  function fetchBoot(url, ms) {
+    return new Promise((resolve, reject) => {
+      let done = false;
+      const t = setTimeout(() => { if (!done) { done = true; reject(new Error('slow')); } }, ms);
+      fetch(url, { headers: { Accept: 'application/json' } })
+        .then((r) => r.json())
+        .then((j) => { if (!done) { done = true; clearTimeout(t); resolve(j); } })
+        .catch((e) => { if (!done) { done = true; clearTimeout(t); reject(e); } });
+    });
+  }
+
+  /* After each render, give the pictures that are actually on screen a high
+     priority and let everything below the fold wait (real speed on a phone). */
+  let lazyObs = null;
+  function tuneImages() {
+    try {
+      const imgs = Array.from(document.querySelectorAll('#view img:not([data-tuned])'));
+      if (!imgs.length) return;
+      if (!('IntersectionObserver' in window)) return;
+      if (!lazyObs) {
+        lazyObs = new IntersectionObserver((entries) => {
+          entries.forEach((en) => {
+            if (!en.isIntersecting) return;
+            const img = en.target;
+            img.loading = 'eager';
+            try { img.fetchPriority = 'high'; } catch (e) {}
+            lazyObs.unobserve(img);
+          });
+        }, { rootMargin: '200px' });
+      }
+      imgs.forEach((img) => {
+        img.setAttribute('data-tuned', '1');
+        img.loading = 'lazy';
+        lazyObs.observe(img);
+      });
+    } catch (e) {}
+  }
+
+  /* Ask the browser to fetch the poster/logo at once (it starts before app.js even runs) */
+  function preloadHero(data) {
+    try {
+      const posts = ((data.hero || {}).posters || []).filter((p) => p && p.url);
+      const first = posts[0];
+      const add = (href, as) => {
+        if (!href) return;
+        if (document.querySelector('link[rel="preload"][href="' + href + '"]')) return;
+        const l = document.createElement('link');
+        l.rel = 'preload'; l.as = as || 'image'; l.href = href;
+        if (as === 'image') l.setAttribute('fetchpriority', 'high');
+        document.head.appendChild(l);
+      };
+      if (first) {
+        const u = first.url;
+        const disp = /\.webp$/i.test(u) ? u.replace(/\.webp$/i, '-lg.webp') : u;
+        add(disp);
+      }
+      const brand = data.brand || {};
+      if (brand.logo) add(brand.logo);
+    } catch (e) {}
+  }
+
   async function boot() {
     let res;
     const cached = readBootCache();
+
+    /* 1) INSTANT PAINT — the last good catalogue from this phone is shown at once
+          (only the prices/dresses that changed are swapped in a moment later) */
+    if (cached && cached.data && Date.now() - (cached.t || 0) < 1000 * 60 * 60 * 24 * 30) {
+      try {
+        preloadHero(cached.data);
+        paint(cached);
+        bindShell();
+        bindLinks();
+        if (navigator.onLine !== false) refreshInBackground();
+        return;
+      } catch (e) { /* fall through to a normal load */ }
+    }
+
+    /* 2) FIRST VISIT — wait for the shop, but never longer than 7 seconds */
     try {
-      res = await fetch('/api/bootstrap').then((r) => r.json());
+      res = await fetchBoot('/api/bootstrap', 7000);
     } catch (e) {
       if (cached && cached.data) { paint(cached); bindShell(); bindLinks(); return; }  /* offline: show the last saved catalogue */
       $('#view').innerHTML = '<div class="wrap sec"><div class="empty">Could not load the store. Please refresh.</div></div>';
       return;
     }
-    if (!res.ok) return;
+    if (!res || !res.ok) return;
+    preloadHero(res.data);
     writeBootCache(res.data);
     S.data = res.data;
     try { mountLivePill(); } catch (e) {}
@@ -1676,20 +1926,10 @@
     const wt = document.getElementById('welcomeTag');
     if (wt && b.tagline) wt.textContent = b.tagline;
     const wl = document.querySelector('#welcome .lw img');
-    if (wl && b.logo) wl.src = b.logo;
+    if (wl && b.logo && !wl.src.includes('logo-3d-480') && !wl.src.includes('logo-3d@2x')) wl.src = b.logo;
 
-    /* floating WhatsApp button (only when you add a number in the admin panel) */
-    const waHref = waLink();
-    if (waHref && !document.querySelector('.wa-fab')) {
-      const fab = document.createElement('a');
-      fab.className = 'wa-fab';
-      fab.href = waHref;
-      fab.target = '_blank';
-      fab.rel = 'noopener';
-      fab.setAttribute('aria-label', 'Chat with us on WhatsApp');
-      fab.innerHTML = I.wa;
-      document.body.appendChild(fab);
-    }
+    /* floating WhatsApp button (brand number) */
+    mountWaFab();
 
     window.__znzSetCurrency = (code) => { S.currency = code; if (S.route.name) route(); };
   window.addEventListener('zz:enter', () => { maybeShowVip(); });
@@ -1698,6 +1938,39 @@
   ping();
   setInterval(() => { if (!document.hidden) { ping(); } }, 25000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) ping(); });
+
+  /* background refresh: never blocks the first paint */
+  let refreshing = false;
+  function refreshInBackground() {
+    if (refreshing) return;
+    refreshing = true;
+    fetchBoot('/api/bootstrap', 12000).then((res) => {
+      refreshing = false;
+      if (!res || !res.ok || !res.data) return;
+      writeBootCache(res.data);
+      /* only repaint when something really changed (cheap JSON compare) */
+      let same = false;
+      try { same = JSON.stringify(res.data) === JSON.stringify(S.data); } catch (e) { same = false; }
+      S.data = res.data;
+      try { mountLivePill(); } catch (e) {}
+      try { mountBgFx(); } catch (e) {}
+      if (!same) {
+        applyTheme(); renderHeader(); renderDrawer(); renderFooter(); route(); bindLinks();
+        const b = S.data.brand || {};
+        const ww = document.getElementById('welcomeWord');
+        if (ww && b.welcomeWord) ww.textContent = b.welcomeWord;
+        const wb = document.getElementById('welcomeBrand');
+        if (wb && b.name) wb.textContent = b.name;
+        const wt = document.getElementById('welcomeTag');
+        if (wt && b.tagline) wt.textContent = b.tagline;
+      }
+      try { mountWaFab(); } catch (e) {}
+    }).catch(() => { refreshing = false; });
+    /* live exchange rates, in parallel */
+    fetch('/api/rates').then((r) => r.json()).then((j) => {
+      if (j && j.ok && j.rates) { S.liveRates = j.rates; if (S.route.name === 'home') route(); }
+    }).catch(() => {});
+  }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

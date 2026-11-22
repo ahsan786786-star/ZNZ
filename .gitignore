@@ -10,3 +10,4 @@ data/db.json.tmp
 
 # pre-compressed copies are generated at boot — never commit them
 *.gz
+# (the .min.js / .min.css files ARE committed — they are what visitors download)
